@@ -186,6 +186,14 @@ extension on WidgetTester {
   Future<void> tapVisible(Finder finder) async {
     FocusManager.instance.primaryFocus?.unfocus();
     await settle();
+    if (finder.evaluate().isEmpty) {
+      // Lazy lists build only what fits the screen; scroll until it exists.
+      await scrollUntilVisible(
+        finder,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+    }
     await ensureVisible(finder);
     await settle();
     await tap(finder);
