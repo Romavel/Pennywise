@@ -1,14 +1,8 @@
+import '../../../core/data/write_result.dart';
 import '../../../core/utils/month.dart';
 import 'transaction.dart';
 
-/// Outcome of a write.
-enum WriteResult {
-  /// Confirmed by the server.
-  saved,
-
-  /// Stored on the device; it syncs when the connection comes back.
-  pendingSync,
-}
+export '../../../core/data/write_result.dart';
 
 /// Transactions of the signed-in user. Implementations throw [AppFailure]
 /// subclasses on error.

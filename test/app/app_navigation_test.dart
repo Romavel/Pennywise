@@ -20,12 +20,9 @@ void main() {
     await pumpPennywise(tester);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Budgets'));
+    await tester.tap(find.text('Budgets').last);
     await tester.pumpAndSettle();
-    expect(
-      find.text('Monthly category budgets arrive in stage 5.'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('No budgets for'), findsOneWidget);
     expect(find.byTooltip('Add transaction'), findsNothing);
 
     await tester.tap(find.text('Transactions').last);

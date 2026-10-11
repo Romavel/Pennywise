@@ -1,9 +1,7 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart' hide Transaction;
 import 'package:flutter/foundation.dart';
 
-import '../../../core/errors/firestore_errors.dart';
+import '../../../core/data/firestore_helpers.dart';
 import '../../../core/utils/month.dart';
 import '../domain/transaction.dart';
 import '../domain/transaction_repository.dart';
@@ -14,7 +12,7 @@ class FirestoreTransactionRepository implements TransactionRepository {
     this._firestore, {
     required this.uid,
     required this.currency,
-    this.ackTimeout = const Duration(seconds: 8),
+    this.ackTimeout = defaultAckTimeout,
   });
 
   final FirebaseFirestore _firestore;
@@ -23,9 +21,7 @@ class FirestoreTransactionRepository implements TransactionRepository {
   /// Currency recorded with new transactions.
   final String currency;
 
-  /// How long to wait for the server before reporting a write as
-  /// [WriteResult.pendingSync]. Firestore keeps offline writes on the device
-  /// and their futures complete only once they reach the server.
+  /// See [defaultAckTimeout].
   final Duration ackTimeout;
 
   CollectionReference<Map<String, dynamic>> get _collection =>
@@ -41,21 +37,21 @@ class FirestoreTransactionRepository implements TransactionRepository {
       .orderBy('occurredAt', descending: true)
       .snapshots()
       .map((snapshot) => snapshot.docs.map(_fromDoc).nonNulls.toList())
-      .transform(_mapErrors());
+      .transform(mapFirestoreErrors());
 
   @override
   Stream<List<Transaction>> watchAll() => _collection
       .orderBy('occurredAt', descending: true)
       .snapshots()
       .map((snapshot) => snapshot.docs.map(_fromDoc).nonNulls.toList())
-      .transform(_mapErrors());
+      .transform(mapFirestoreErrors());
 
   @override
   Stream<Transaction?> watchById(String id) => _collection
       .doc(id)
       .snapshots()
       .map((doc) => doc.exists ? _fromDoc(doc) : null)
-      .transform(_mapErrors());
+      .transform(mapFirestoreErrors());
 
   @override
   Future<WriteResult> create(TransactionDraft draft) => _write(
@@ -111,22 +107,6 @@ class FirestoreTransactionRepository implements TransactionRepository {
     }
   }
 
-  Future<WriteResult> _write(Future<void> Function() action) async {
-    try {
-      await action().timeout(ackTimeout);
-      return WriteResult.saved;
-    } on TimeoutException {
-      return WriteResult.pendingSync;
-    } on FirebaseException catch (e) {
-      throw mapFirestoreException(e);
-    }
-  }
-
-  static StreamTransformer<T, T> _mapErrors<T>() =>
-      StreamTransformer.fromHandlers(
-        handleError: (error, stackTrace, sink) => sink.addError(
-          error is FirebaseException ? mapFirestoreException(error) : error,
-          stackTrace,
-        ),
-      );
+  Future<WriteResult> _write(Future<void> Function() action) =>
+      runFirestoreWrite(action, ackTimeout: ackTimeout);
 }

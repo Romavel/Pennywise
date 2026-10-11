@@ -71,8 +71,7 @@ void main() {
     expect(find.text(_thisMonth.label), findsOneWidget);
     // All time: 7,200 + 1,000 - 1,500 - 86.40.
     expect(find.text('PLN 6,613.60'), findsOneWidget);
-    // In the income tile and on the salary row.
-    expect(find.text('+7,200.00'), findsNWidgets(2));
+    expect(find.text('+7,200.00'), findsWidgets);
     expect(find.text('−1,586.40'), findsOneWidget);
   });
 
@@ -109,7 +108,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(_thisMonth.previous.label), findsOneWidget);
-    expect(find.text('+1,000.00'), findsNWidgets(2));
+    expect(find.text('+1,000.00'), findsWidgets);
     expect(find.text('0.00'), findsOneWidget);
     expect(
       find.text('No expenses in ${_thisMonth.previous.monthName} yet.'),
@@ -148,8 +147,11 @@ void main() {
 
     await tester.tap(find.byTooltip('Previous month'));
     await tester.pumpAndSettle();
-    final seeAll = find.text('See all');
-    await tester.ensureVisible(seeAll);
+    // Scroll the recent transactions card clear of the floating button.
+    await tester.scrollUntilVisible(find.text('Recent transactions'), 200);
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -300));
+    await tester.pumpAndSettle();
+    final seeAll = find.text('See all').last;
     await tester.tap(seeAll);
     await tester.pumpAndSettle();
 

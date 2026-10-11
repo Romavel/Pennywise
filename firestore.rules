@@ -26,6 +26,42 @@ service cloud.firestore {
       allow delete: if isOwner(uid);
     }
 
+    // One budget per category and month: the id is "{monthKey}_{categoryId}".
+    match /users/{uid}/budgets/{budgetId} {
+      allow read: if isOwner(uid);
+
+      allow create: if isOwner(uid)
+        && isValidBudget(request.resource.data)
+        && budgetId == request.resource.data.monthKey + '_' + request.resource.data.categoryId
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+
+      // Only the limit can change.
+      allow update: if isOwner(uid)
+        && isValidBudget(request.resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['limitMinor', 'updatedAt'])
+        && request.resource.data.updatedAt == request.time;
+
+      allow delete: if isOwner(uid);
+    }
+
+    function isValidBudget(data) {
+      let fields = ['categoryId', 'monthKey', 'limitMinor', 'currency',
+                    'createdAt', 'updatedAt'];
+      return data.keys().hasAll(fields)
+        && data.keys().hasOnly(fields)
+        && data.categoryId is string
+        && data.categoryId.matches('^[a-z0-9_]{1,64}$')
+        && data.monthKey is string
+        && data.monthKey.matches('^[0-9]{4}-(0[1-9]|1[0-2])$')
+        && data.limitMinor is int
+        && data.limitMinor > 0
+        && data.limitMinor <= 100000000000
+        && data.currency is string
+        && data.currency.matches('^[A-Z]{3}$');
+    }
+
     // Mirrors the client-side validation in the Flutter app.
     function isValidTransaction(data) {
       let fields = ['type', 'amountMinor', 'currency', 'categoryId', 'note',

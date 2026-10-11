@@ -2,7 +2,7 @@
 
 A Flutter app for tracking income, expenses and monthly budgets, backed by Firebase.
 
-> Status: **stage 4 — dashboard.** Authentication, transactions in Cloud Firestore and a dashboard with the all-time balance, monthly totals, spending by category and recent transactions. Budgets, reports and settings come next.
+> Status: **stage 5 — budgets and reports.** Authentication, transactions, a dashboard, monthly category budgets and reports work on Cloud Firestore. Settings, custom categories and account deletion come next.
 
 ## Stack
 
@@ -87,6 +87,18 @@ Each user's data lives under `users/{uid}`. Transactions are stored in `users/{u
 | `note` | string | up to 200 characters, may be empty |
 | `occurredAt` | timestamp | date of the transaction |
 | `createdAt`, `updatedAt` | timestamp | set by the server |
+
+Budgets are stored in `users/{uid}/budgets/{yyyy-MM}_{categoryId}`, so each category has at most one budget per month:
+
+| Field | Type | Notes |
+|---|---|---|
+| `categoryId` | string | expense category |
+| `monthKey` | string | `yyyy-MM` |
+| `limitMinor` | int | monthly limit in the smallest currency unit, > 0 |
+| `currency` | string | ISO 4217 code |
+| `createdAt`, `updatedAt` | timestamp | set by the server |
+
+Only `limitMinor` can change after creation. Spending against a budget is computed on the device from that month's expenses (by transaction date); income never reduces it, and going over a limit never blocks adding transactions.
 
 The list queries one month by `occurredAt`; type, category and note search are applied on the device, so no composite indexes are needed. The dashboard's all-time balance listens to all of the user's transactions (served from Firestore's local cache after the first load); for very long histories this would move to a server-maintained running total.
 

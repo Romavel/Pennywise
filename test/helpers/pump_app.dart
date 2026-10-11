@@ -5,9 +5,11 @@ import 'package:pennywise/app/app.dart';
 import 'package:pennywise/app/providers.dart';
 import 'package:pennywise/core/config/app_config.dart';
 import 'package:pennywise/features/auth/data/auth_providers.dart';
+import 'package:pennywise/features/budgets/data/budget_providers.dart';
 import 'package:pennywise/features/transactions/data/transaction_providers.dart';
 
 import 'fake_auth_repository.dart';
+import 'fake_budget_repository.dart';
 import 'fake_transaction_repository.dart';
 
 const testConfig = AppConfig(
@@ -19,12 +21,14 @@ const testConfig = AppConfig(
 /// Pumps the whole app with Firebase replaced by fakes.
 ///
 /// [firebaseInit] succeeds immediately by default; [auth] defaults to a
-/// repository with [testUser] signed in; [transactions] to an empty one.
+/// repository with [testUser] signed in; [transactions] and [budgets] to
+/// empty ones.
 Future<FakeAuthRepository> pumpPennywise(
   WidgetTester tester, {
   Future<void> Function()? firebaseInit,
   FakeAuthRepository? auth,
   FakeTransactionRepository? transactions,
+  FakeBudgetRepository? budgets,
 }) async {
   final authRepository = auth ?? FakeAuthRepository(currentUser: testUser);
   // Phone-sized viewport, matching the 390×844 design frame.
@@ -42,6 +46,9 @@ Future<FakeAuthRepository> pumpPennywise(
         authRepositoryProvider.overrideWithValue(authRepository),
         transactionRepositoryProvider.overrideWithValue(
           transactions ?? FakeTransactionRepository(),
+        ),
+        budgetRepositoryProvider.overrideWithValue(
+          budgets ?? FakeBudgetRepository(),
         ),
       ],
       child: const PennywiseApp(),

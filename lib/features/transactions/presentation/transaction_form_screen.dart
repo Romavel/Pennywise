@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_theme.dart';
+import '../../../core/utils/amount_input_formatter.dart';
 import '../../../core/utils/dates.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/error_banner.dart';
@@ -210,15 +210,18 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
   void _finish(String message, AsyncValue<WriteResult?> result) {
     if (result.hasError) return;
     final offline = result.value == WriteResult.pendingSync;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          offline
-              ? '$message offline. It will sync when you’re back online.'
-              : message,
+    // Replace any earlier confirmation instead of queueing behind it.
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            offline
+                ? '$message offline. It will sync when you’re back online.'
+                : message,
+          ),
         ),
-      ),
-    );
+      );
     context.pop();
   }
 
@@ -477,9 +480,6 @@ class _AmountField extends StatelessWidget {
   final bool enabled;
   final VoidCallback onChanged;
 
-  // Digits with at most one separator and two decimals.
-  static final _allowed = RegExp(r'^\d{0,10}([.,]\d{0,2})?$');
-
   @override
   Widget build(BuildContext context) {
     final colors = context.pwColors;
@@ -525,11 +525,7 @@ class _AmountField extends StatelessWidget {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  inputFormatters: [
-                    TextInputFormatter.withFunction(
-                      (old, next) => _allowed.hasMatch(next.text) ? next : old,
-                    ),
-                  ],
+                  inputFormatters: [amountInputFormatter],
                   onChanged: (_) => onChanged(),
                   style: GoogleFonts.bricolageGrotesque(
                     fontSize: 48,

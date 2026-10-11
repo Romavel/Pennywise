@@ -6,11 +6,16 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../app/routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_theme.dart';
+import '../../../app/theme/app_typography.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/utils/month.dart';
+import '../../../core/widgets/month_switcher.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../auth/data/auth_providers.dart';
 import '../../auth/domain/app_user.dart';
+import '../../budgets/domain/budget_progress.dart';
+import '../../budgets/presentation/budget_widgets.dart';
+import '../../budgets/presentation/budgets_controller.dart';
 import '../../transactions/data/transaction_providers.dart';
 import '../../transactions/domain/transaction_filter.dart';
 import '../../transactions/presentation/transaction_tile.dart';
@@ -32,7 +37,7 @@ class DashboardScreen extends ConsumerWidget {
     final header = <Widget>[
       _Greeting(user: user),
       const SizedBox(height: 18),
-      _MonthSwitcher(
+      MonthSwitcher(
         month: month,
         onPrevious: monthNotifier.previous,
         onNext: monthNotifier.next,
@@ -106,6 +111,16 @@ class DashboardScreen extends ConsumerWidget {
 
     return [
       _BalanceCard(summary: data, currency: currency),
+      const SizedBox(height: 18),
+      _Section(
+        title: 'Budgets',
+        actionLabel: 'See all',
+        onAction: () {
+          ref.read(budgetsMonthProvider.notifier).show(data.month);
+          context.go(AppRoutes.budgets);
+        },
+        child: _BudgetSummary(month: data.month, currency: currency),
+      ),
       const SizedBox(height: 18),
       _Section(
         title: 'Spending by category',
@@ -215,50 +230,6 @@ class _Greeting extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _MonthSwitcher extends StatelessWidget {
-  const _MonthSwitcher({
-    required this.month,
-    required this.onPrevious,
-    required this.onNext,
-  });
-
-  final Month month;
-  final VoidCallback onPrevious;
-  final VoidCallback onNext;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: ShapeDecoration(
-        color: context.pwColors.card,
-        shape: const StadiumBorder(),
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            tooltip: 'Previous month',
-            icon: const Icon(Icons.chevron_left),
-            onPressed: onPrevious,
-          ),
-          Expanded(
-            child: Text(
-              month.label,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-          ),
-          IconButton(
-            tooltip: 'Next month',
-            icon: const Icon(Icons.chevron_right),
-            onPressed: onNext,
-          ),
-        ],
-      ),
     );
   }
 }
@@ -471,4 +442,110 @@ class _EmptyNote extends StatelessWidget {
       ).textTheme.bodyMedium?.copyWith(color: context.pwColors.mutedText),
     ),
   );
+}
+
+/// Budget totals for the dashboard month.
+class _BudgetSummary extends ConsumerWidget {
+  const _BudgetSummary({required this.month, required this.currency});
+
+  final Month month;
+  final String currency;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final overview = ref.watch(budgetOverviewProvider(month));
+    final colors = context.pwColors;
+    final textTheme = Theme.of(context).textTheme;
+
+    return overview.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: LinearProgressIndicator(),
+      ),
+      error: (error, _) => _EmptyNote(ErrorView.messageFor(error)),
+      data: (data) {
+        if (data.isEmpty) {
+          return _EmptyNote(
+            'No budgets for ${month.monthName}. '
+            'Set limits to track your spending.',
+          );
+        }
+        final remaining = data.remainingMinor;
+        final overCount = data.overLimit.length;
+        final barColor = remaining < 0
+            ? colors.budgetOver
+            : data.ratio >= BudgetProgress.nearThreshold
+            ? colors.budgetNear
+            : colors.budgetOk;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: '$currency ${Money.format(data.spentMinor)}',
+                    style: GoogleFonts.bricolageGrotesque(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  TextSpan(
+                    text: '  of ${Money.format(data.limitMinor)}',
+                    style: textTheme.bodyMedium?.copyWith(
+                      fontSize: 14,
+                      color: colors.mutedText,
+                    ),
+                  ),
+                ],
+              ),
+              style: const TextStyle(
+                fontFeatures: AppTypography.tabularFigures,
+              ),
+            ),
+            const SizedBox(height: 12),
+            BudgetBar(ratio: data.ratio, color: barColor, height: 10),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    remaining < 0
+                        ? '${data.percent}% used · '
+                              '$currency ${Money.format(-remaining)} over'
+                        : '${data.percent}% used · '
+                              '$currency ${Money.format(remaining)} left',
+                    style: textTheme.labelMedium?.copyWith(
+                      color: colors.mutedText,
+                      fontFeatures: AppTypography.tabularFigures,
+                    ),
+                  ),
+                ),
+                if (overCount > 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: ShapeDecoration(
+                      color: colors.warningBackground,
+                      shape: const StadiumBorder(),
+                    ),
+                    child: Text(
+                      '$overCount over limit',
+                      style: textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colors.warningForeground,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

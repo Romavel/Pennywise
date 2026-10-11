@@ -12,9 +12,12 @@ class Month implements Comparable<Month> {
 
   /// Parses a `yyyy-MM` key as stored with budgets.
   factory Month.parse(String key) {
-    final parts = key.split('-');
-    if (parts.length != 2) throw FormatException('Invalid month key', key);
-    return Month(int.parse(parts[0]), int.parse(parts[1]));
+    final match = RegExp(r'^(\d{4})-(\d{2})$').firstMatch(key);
+    final month = match == null ? 0 : int.parse(match.group(2)!);
+    if (month < 1 || month > 12) {
+      throw FormatException('Invalid month key', key);
+    }
+    return Month(int.parse(match!.group(1)!), month);
   }
 
   final int year;
