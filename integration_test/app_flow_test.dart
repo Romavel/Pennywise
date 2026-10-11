@@ -14,6 +14,9 @@ import 'package:pennywise/app/app.dart';
 import 'package:pennywise/app/providers.dart';
 import 'package:pennywise/core/config/app_config.dart';
 
+/// Printed so a CI failure shows how far the flow got.
+void step(String name) => debugPrint('STEP: $name');
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   GoogleFonts.config.allowRuntimeFetching = false;
@@ -41,8 +44,9 @@ void main() {
     );
 
     // --- Sign up --------------------------------------------------------
+    step('Sign up');
     await tester.waitFor(find.text('Welcome back'));
-    await tester.tap(find.text('Sign up'));
+    await tester.tapVisible(find.text('Sign up'));
     await tester.settle();
     await tester.enterText(tester.field('auth-name'), 'Integration');
     await tester.enterText(tester.field('auth-email'), email);
@@ -54,20 +58,22 @@ void main() {
     expect(find.text('PLN 0.00'), findsOneWidget);
 
     // --- Create a budget ------------------------------------------------
+    step('Create a budget');
     await tester.openTab('Budgets');
-    await tester.tap(find.text('New budget'));
+    await tester.tapVisible(find.text('New budget'));
     await tester.settle();
-    await tester.tap(find.text('Food & Groceries'));
+    await tester.tapVisible(find.text('Food & Groceries'));
     await tester.enterText(find.byKey(const Key('budget-limit-field')), '200');
-    await tester.tap(find.text('Create budget'));
+    await tester.tapVisible(find.text('Create budget'));
     await tester.waitFor(find.text('PLN 0.00 of 200.00'));
 
     // --- Add a transaction; the budget follows ----------------------------
+    step('Add a transaction; the budget follows');
     await tester.openTab('Transactions');
-    await tester.tap(find.byTooltip('Add transaction'));
+    await tester.tapVisible(find.byTooltip('Add transaction'));
     await tester.settle();
     await tester.enterText(find.byKey(const Key('amount-field')), '45.99');
-    await tester.tap(find.text('Food'));
+    await tester.tapVisible(find.text('Food'));
     await tester.enterText(
       find.widgetWithText(TextField, 'Add a note (optional)'),
       'Groceries',
@@ -80,8 +86,9 @@ void main() {
     await tester.waitFor(find.text('PLN 45.99 of 200.00'));
 
     // --- Edit it over the limit --------------------------------------------
+    step('Edit it over the limit');
     await tester.openTab('Transactions');
-    await tester.tap(find.text('Groceries'));
+    await tester.tapVisible(find.text('Groceries'));
     await tester.waitFor(find.text('Edit transaction'));
     await tester.enterText(find.byKey(const Key('amount-field')), '250');
     await tester.tapVisible(find.widgetWithText(FilledButton, 'Save changes'));
@@ -92,23 +99,26 @@ void main() {
     );
 
     // --- Delete it ------------------------------------------------------
+    step('Delete it');
     await tester.openTab('Transactions');
-    await tester.tap(find.text('Groceries'));
+    await tester.tapVisible(find.text('Groceries'));
     await tester.waitFor(find.byTooltip('Delete transaction'));
-    await tester.tap(find.byTooltip('Delete transaction'));
+    await tester.tapVisible(find.byTooltip('Delete transaction'));
     await tester.settle();
-    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
+    await tester.tapVisible(find.widgetWithText(TextButton, 'Delete'));
     await tester.waitFor(find.textContaining('No transactions in'));
     await tester.openTab('Budgets');
     await tester.waitFor(find.text('PLN 0.00 of 200.00'));
 
     // --- Log out ----------------------------------------------------------
+    step('Log out');
     await tester.openTab('Settings');
     await tester.tapVisible(find.text('Log out'));
     await tester.waitFor(find.text('Welcome back'));
 
     // --- Firebase errors are shown in plain words ---------------------------
-    await tester.tap(find.text('Sign up'));
+    step('Firebase errors are shown in plain words');
+    await tester.tapVisible(find.text('Sign up'));
     await tester.settle();
     await tester.enterText(tester.field('auth-name'), 'Someone else');
     await tester.enterText(tester.field('auth-email'), email);
@@ -122,7 +132,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('Log in'));
+    await tester.tapVisible(find.text('Log in'));
     await tester.settle();
     await tester.enterText(tester.field('auth-email'), email);
     await tester.enterText(tester.field('auth-password'), 'wrong-password');
@@ -134,6 +144,7 @@ void main() {
     );
 
     // --- Log in again: the data is still there --------------------------------
+    step('Log in again: the data is still there');
     await tester.enterText(tester.field('auth-password'), password);
     await tester.tapVisible(find.widgetWithText(FilledButton, 'Log in'));
     await tester.waitFor(find.text('Total balance'));
@@ -170,7 +181,11 @@ extension on WidgetTester {
     matching: find.byType(TextFormField),
   );
 
+  /// On a device the software keyboard shrinks the screen, which can push
+  /// the target out of view; close it and scroll to the target first.
   Future<void> tapVisible(Finder finder) async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    await settle();
     await ensureVisible(finder);
     await settle();
     await tap(finder);
@@ -178,6 +193,8 @@ extension on WidgetTester {
   }
 
   Future<void> openTab(String label) async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    await settle();
     await tap(
       find.descendant(
         of: find.byType(NavigationBar),
