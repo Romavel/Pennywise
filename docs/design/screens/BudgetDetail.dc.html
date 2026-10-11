@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pennywise — Budget details</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&amp;family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0F4C45}a:hover{color:#0A3530}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #F3F5F4; color: #12201E; font-family: 'DM Sans', system-ui, sans-serif; display: flex; flex-direction: column; gap: 14px; padding: 48px 20px 24px">
+
+<header style="display: flex; align-items: center; gap: 10px">
+<a href="Budgets.dc.html" aria-label="Back to budgets" style="width: 44px; height: 44px; border-radius: 999px; background: #FFFFFF; color: #12201E; display: flex; align-items: center; justify-content: center; flex: none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></a>
+<div style="flex: 1; display: flex; flex-direction: column; gap: 1px">
+<h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -0.02em">Transport</h1>
+<span style="font-size: 13px; color: #5B6663">October 2026</span>
+</div>
+<button aria-label="Edit budget limit" style="width: 44px; height: 44px; border: 0; border-radius: 999px; background: #FFFFFF; color: #12201E; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/></svg></button>
+</header>
+
+<section style="background: #FFFFFF; border-radius: 22px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 13px; color: #5B6663">Spent this month</span>
+<span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 34px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums">PLN 310.00</span>
+</div>
+<span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; color: #C2410C; font-variant-numeric: tabular-nums">103%</span>
+</div>
+<div style="position: relative; height: 12px; border-radius: 999px; background: #E3E9E7; overflow: hidden"><div style="width: 100%; height: 100%; border-radius: 999px; background: #C2410C"></div></div>
+<div role="status" style="display: flex; align-items: center; gap: 8px; color: #9A3412; background: #FDE7DC; border-radius: 12px; padding: 10px 12px; font-size: 13px; font-weight: 600">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9.5 17h-19zM12 10v4M12 17.5h.01"/></svg>
+PLN 10.00 over your limit
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; font-variant-numeric: tabular-nums">
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #5B6663">Limit</span><span style="font-size: 15px; font-weight: 700">300.00</span></div>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #5B6663">Spent</span><span style="font-size: 15px; font-weight: 700">310.00</span></div>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #5B6663">Remaining</span><span style="font-size: 15px; font-weight: 700; color: #B23F0E">−10.00</span></div>
+</div>
+</section>
+
+<section style="background: #FFFFFF; border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<h2 style="margin: 0; font-size: 16px; font-weight: 700">Last 6 months</h2>
+<span style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #5B6663"><span style="width: 14px; border-top: 2px dashed #5B6663"></span>Limit 300</span>
+</div>
+<div role="img" aria-label="Transport spending May to October: 240, 320, 345, 260, 290, 310 PLN against a 300 PLN limit" style="display: flex; flex-direction: column; gap: 6px">
+<div style="position: relative; height: 100px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; align-items: end; border-bottom: 1px solid #C9D3CF">
+<sc-for list="{{history}}" as="h" hint-placeholder-count="6">
+<div style="display: flex; justify-content: center; height: 100%; align-items: flex-end"><div style="width: 22px; height: {{h.height}}; border-radius: 6px 6px 0 0; background: {{h.color}}"></div></div>
+</sc-for>
+<div style="position: absolute; left: 0; right: 0; bottom: 75px; border-top: 2px dashed #5B6663"></div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; font-size: 11px; color: #5B6663; text-align: center">
+<sc-for list="{{history}}" as="h" hint-placeholder-count="6"><span style="font-weight: {{h.weight}}; color: {{h.labelColor}}">{{h.label}}</span></sc-for>
+</div>
+</div>
+<span style="font-size: 13px; color: #5B6663">Over the limit in 3 of the last 6 months.</span>
+</section>
+
+<section style="background: #FFFFFF; border-radius: 22px; padding: 6px 18px 8px; display: flex; flex-direction: column">
+<h2 style="margin: 0; padding: 12px 0 8px; font-size: 16px; font-weight: 700">Transactions</h2>
+<sc-for list="{{txs}}" as="t" hint-placeholder-count="3">
+<div style="display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid #EDF1EF">
+<div style="width: 38px; height: 38px; border-radius: 12px; background: #DDEBF3; color: #245E80; display: flex; align-items: center; justify-content: center; flex: none">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v11H4zM4 11h16M8 21v-4M16 21v-4"/></svg>
+</div>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 15px; font-weight: 600">{{t.note}}</span>
+<span style="font-size: 12px; color: #5B6663">{{t.date}}</span>
+</div>
+<span style="font-size: 15px; font-weight: 700; color: #B23F0E; font-variant-numeric: tabular-nums">{{t.amount}}</span>
+</div>
+</sc-for>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+var limit = 300;
+var data = [['May', 240], ['Jun', 320], ['Jul', 345], ['Aug', 260], ['Sep', 290], ['Oct', 310]];
+var history = data.map(function (d, i) {
+var last = i === data.length - 1;
+return { label: d[0], height: Math.round(d[1] / 400 * 100) + 'px', color: d[1] > limit ? '#E07B39' : '#0F4C45',
+weight: last ? '700' : '500', labelColor: last ? '#12201E' : '#5B6663' };
+});
+return {
+history: history,
+txs: [
+{ note: 'Ride to the office', date: 'Sun, 11 Oct', amount: '−32.00' },
+{ note: 'Fuel', date: 'Sun, 4 Oct', amount: '−168.00' },
+{ note: 'Monthly transit pass', date: 'Thu, 1 Oct', amount: '−110.00' }
+]
+};
+}
+}
+</script>
+</body>
+</html>

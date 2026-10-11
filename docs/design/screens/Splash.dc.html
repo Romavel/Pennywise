@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pennywise — Splash</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&amp;family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#FFFFFF}a:hover{color:#FFFFFF}
+@keyframes pwspin{to{transform:rotate(360deg)}}
+</style>
+</helmet>
+<a href="Login.dc.html" aria-label="Pennywise is loading. Continue to log in" style="width: 390px; height: 844px; box-sizing: border-box; background: #0F4C45; color: #FFFFFF; font-family: 'DM Sans', system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 0 32px 64px; text-decoration: none">
+
+<div style="height: 120px"></div>
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 22px">
+<div style="width: 96px; height: 96px; border-radius: 30px; background: #E07B39; display: flex; align-items: center; justify-content: center; box-shadow: 0 16px 40px rgba(0,0,0,0.25)">
+<svg width="52" height="52" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+<ellipse cx="24" cy="14" rx="14" ry="5.5" stroke="#1B0E05" stroke-width="3.2"/>
+<path d="M10 14v10c0 3 6.3 5.5 14 5.5S38 27 38 24V14" stroke="#1B0E05" stroke-width="3.2" stroke-linecap="round"/>
+<path d="M10 24v10c0 3 6.3 5.5 14 5.5S38 37 38 34V24" stroke="#1B0E05" stroke-width="3.2" stroke-linecap="round"/>
+</svg>
+</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 8px">
+<span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 40px; font-weight: 700; letter-spacing: -0.03em">Pennywise</span>
+<span style="font-size: 16px; color: #CFE3DD">Know where your money goes.</span>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 14px">
+<span role="progressbar" aria-label="Loading" style="width: 28px; height: 28px; border-radius: 999px; border: 3px solid #2B6A62; border-top-color: #A8EBC9; animation: pwspin 0.9s linear infinite; box-sizing: border-box"></span>
+<span style="font-size: 13px; color: #CFE3DD">Getting things ready…</span>
+</div>
+
+</a>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pennywise — Budgets</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&amp;family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0F4C45}a:hover{color:#0A3530}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: {{p.ground}}; color: {{p.ink}}; font-family: 'DM Sans', system-ui, sans-serif; display: flex; flex-direction: column; position: relative; overflow: hidden">
+
+<main style="flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; gap: 14px; padding: 52px 20px 16px">
+
+<header style="display: flex; align-items: center; justify-content: space-between">
+<h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Budgets</h1>
+<button style="height: 44px; border: 0; border-radius: 999px; background: {{p.primary}}; color: {{p.onPrimary}}; display: flex; align-items: center; gap: 6px; padding: 0 16px 0 12px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>New budget</button>
+</header>
+
+<div style="display: flex; align-items: center; justify-content: space-between; background: {{p.surface}}; border-radius: 999px; padding: 4px">
+<button aria-label="Previous month" style="width: 44px; height: 44px; border: 0; border-radius: 999px; background: transparent; color: {{p.ink}}; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+<span style="font-size: 15px; font-weight: 600">October 2026</span>
+<button aria-label="Next month" style="width: 44px; height: 44px; border: 0; border-radius: 999px; background: transparent; color: {{p.ink}}; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+</div>
+
+<section style="background: {{p.hero}}; color: #FFFFFF; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<span style="font-size: 13px; color: #CFE3DD; font-weight: 500">Left to spend this month</span>
+<span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 34px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums">PLN 577.50</span>
+<div style="height: 10px; border-radius: 999px; background: #2B6A62; overflow: hidden"><div style="width: 85%; height: 100%; border-radius: 999px; background: #A8EBC9"></div></div>
+<div style="display: flex; justify-content: space-between; font-size: 13px; color: #CFE3DD; font-variant-numeric: tabular-nums">
+<span>Spent 3,272.50 of 3,850.00</span>
+<span style="font-weight: 700; color: #FFFFFF">85%</span>
+</div>
+</section>
+
+<div role="status" style="display: flex; align-items: center; gap: 10px; background: {{p.warnBg}}; color: {{p.warnFg}}; border-radius: 14px; padding: 12px 14px; font-size: 13px; font-weight: 500">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9.5 17h-19zM12 10v4M12 17.5h.01"/></svg>
+<span>Transport is over its limit by PLN 10.00</span>
+</div>
+
+<ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{budgets}}" as="b" hint-placeholder-count="5">
+<li>
+<a href="BudgetDetail.dc.html" style="display: flex; flex-direction: column; gap: 10px; background: {{p.surface}}; border-radius: 18px; padding: 14px 16px; text-decoration: none; color: {{p.ink}}">
+<div style="display: flex; align-items: center; gap: 12px">
+<div style="width: 36px; height: 36px; border-radius: 11px; background: {{b.bg}}; color: {{b.fg}}; display: flex; align-items: center; justify-content: center; flex: none">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{b.icon}}"/></svg>
+</div>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px">
+<span style="font-size: 15px; font-weight: 600">{{b.name}}</span>
+<span style="font-size: 12px; color: {{p.muted}}; font-variant-numeric: tabular-nums">{{b.used}} of {{b.limit}}</span>
+</div>
+<span style="font-size: 15px; font-weight: 700; color: {{b.pctColor}}; font-variant-numeric: tabular-nums">{{b.pct}}</span>
+</div>
+<div style="height: 8px; border-radius: 999px; background: {{p.track}}; overflow: hidden"><div style="width: {{b.barW}}; height: 100%; border-radius: 999px; background: {{b.barColor}}"></div></div>
+<span style="font-size: 12px; font-weight: 600; color: {{b.statusColor}}; font-variant-numeric: tabular-nums">{{b.status}}</span>
+</a>
+</li>
+</sc-for>
+</ul>
+
+</main>
+
+<nav aria-label="Main" style="height: 76px; flex: none; background: {{p.surface}}; border-top: 1px solid {{p.line}}; display: flex; align-items: stretch; padding: 0 6px 6px">
+<a href="{{p.homeHref}}" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: {{p.muted}}; font-size: 11px; font-weight: 500"><span style="padding: 4px 16px; display: flex"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>Dashboard</a>
+<a href="Transactions.dc.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: {{p.muted}}; font-size: 11px; font-weight: 500"><span style="padding: 4px 16px; display: flex"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/></svg></span>Transactions</a>
+<a href="#" aria-current="page" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: {{p.navActive}}; font-size: 11px; font-weight: 700"><span style="background: {{p.navPill}}; border-radius: 999px; padding: 4px 16px; display: flex"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6.4 6.4"/></svg></span>Budgets</a>
+<a href="Reports.dc.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: {{p.muted}}; font-size: 11px; font-weight: 500"><span style="padding: 4px 16px; display: flex"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M7 17v-5M12 17V6M17 17V9"/></svg></span>Reports</a>
+<a href="Settings.dc.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: {{p.muted}}; font-size: 11px; font-weight: 500"><span style="padding: 4px 16px; display: flex"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></span>Settings</a>
+</nav>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+var dark = this.props.dark ?? false;
+var p = dark ? {
+ground: '#0E1514', surface: '#18221F', ink: '#E8EEEC', muted: '#9AA8A3', line: '#24302D', track: '#26332F',
+primary: '#4CC3A0', onPrimary: '#06201A', hero: '#14463F', navActive: '#7FD8BC', navPill: '#1E3A34',
+warnBg: '#3A2216', warnFg: '#FFC3A3', ok: '#4CC3A0', near: '#F2B544', over: '#F2875A', homeHref: 'DashboardDark.dc.html'
+} : {
+ground: '#F3F5F4', surface: '#FFFFFF', ink: '#12201E', muted: '#5B6663', line: '#E3E9E7', track: '#E3E9E7',
+primary: '#0F4C45', onPrimary: '#FFFFFF', hero: '#0F4C45', navActive: '#0F4C45', navPill: '#DCEBE6',
+warnBg: '#FDE7DC', warnFg: '#9A3412', ok: '#0F4C45', near: '#B7790F', over: '#C2410C', homeHref: 'Main.dc.html'
+};
+var I = {
+housing: 'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z',
+food: 'M2 3h3l2.5 12h12L22 7H6M9 20.5h.01M18 20.5h.01',
+transport: 'M4 6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v11H4zM4 11h16M8 21v-4M16 21v-4',
+shopping: 'M5 8h14l-1 13H6zM9 8V6a3 3 0 0 1 6 0v2',
+fun: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM10 8.5l5 3.5-5 3.5z'
+};
+var tint = dark ? {
+housing: ['#1C3540', '#9CC6D8'], food: ['#3A2618', '#F2A774'], transport: ['#1A3040', '#94C4E2'],
+shopping: ['#3A3216', '#F2CF73'], fun: ['#2E2440', '#C7AEE6']
+} : {
+housing: ['#DCE7EA', '#173F4F'], food: ['#FBE6D7', '#9A4A16'], transport: ['#DDEBF3', '#245E80'],
+shopping: ['#FBF0D2', '#7A5B0E'], fun: ['#ECE4F3', '#5B3F7A']
+};
+var rows = [
+['housing', 'Housing', 1650.00, 1700],
+['food', 'Food & Groceries', 842.60, 1200],
+['transport', 'Transport', 310.00, 300],
+['shopping', 'Shopping', 289.90, 400],
+['fun', 'Entertainment', 180.00, 250]
+];
+var fmt = function (n) { return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+var budgets = rows.map(function (r) {
+var pct = Math.round(r[2] / r[3] * 100);
+var over = r[2] > r[3];
+var near = !over && pct >= 90;
+var col = over ? p.over : (near ? p.near : p.ok);
+return {
+name: r[1], icon: I[r[0]], bg: tint[r[0]][0], fg: tint[r[0]][1],
+used: 'PLN ' + fmt(r[2]), limit: fmt(r[3]), pct: pct + '%',
+barW: Math.min(pct, 100) + '%', barColor: col,
+pctColor: over || near ? col : p.ink,
+status: over ? 'PLN ' + fmt(r[2] - r[3]) + ' over limit' : 'PLN ' + fmt(r[3] - r[2]) + ' left',
+statusColor: over ? p.over : p.muted
+};
+});
+return { p: p, budgets: budgets };
+}
+}
+</script>
+</body>
+</html>

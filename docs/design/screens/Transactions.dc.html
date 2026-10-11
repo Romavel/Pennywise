@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pennywise — Transactions</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&amp;family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0F4C45}a:hover{color:#0A3530}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F3F5F4; color: #12201E; font-family: 'DM Sans', system-ui, sans-serif; display: flex; flex-direction: column; position: relative; overflow: hidden">
+
+<main style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; padding: 52px 20px 0">
+
+<header style="display: flex; align-items: center; justify-content: space-between">
+<h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Transactions</h1>
+<button aria-label="Sort: newest first" style="height: 44px; border: 0; border-radius: 999px; background: #FFFFFF; color: #12201E; display: flex; align-items: center; gap: 6px; padding: 0 14px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M3 16l4 4 4-4M14 6h7M14 12h5M14 18h3"/></svg>Newest</button>
+</header>
+
+<label style="display: flex; align-items: center; gap: 10px; height: 48px; background: #FFFFFF; border-radius: 14px; padding: 0 14px; color: #5B6663">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search in notes</span>
+<input type="search" placeholder="Search in notes" style="flex: 1; border: 0; outline: none; background: transparent; font-family: inherit; font-size: 15px; color: #12201E">
+</label>
+
+<div style="display: flex; align-items: center; justify-content: space-between">
+<button aria-label="Previous month" style="width: 44px; height: 44px; border: 0; border-radius: 999px; background: transparent; color: #12201E; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 1px">
+<span style="font-size: 15px; font-weight: 600">October 2026</span>
+<span style="font-size: 12px; color: #5B6663; font-variant-numeric: tabular-nums"><span style="color: #14613F; font-weight: 600">+8,200.00</span> · <span style="color: #B23F0E; font-weight: 600">−3,412.40</span></span>
+</div>
+<button aria-label="Next month" style="width: 44px; height: 44px; border: 0; border-radius: 999px; background: transparent; color: #12201E; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+</div>
+
+<div role="group" aria-label="Filter by type" style="display: flex; gap: 8px; flex-wrap: wrap">
+<sc-for list="{{chips}}" as="c" hint-placeholder-count="3">
+<button aria-pressed="{{c.pressed}}" onClick="{{c.pick}}" style="height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid {{c.border}}; background: {{c.bg}}; color: {{c.fg}}; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">{{c.label}}</button>
+</sc-for>
+<button style="height: 36px; padding: 0 12px 0 14px; border-radius: 999px; border: 1px solid #D3DCD9; background: #FFFFFF; color: #12201E; font-family: inherit; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 4px; cursor: pointer">Category<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+</div>
+
+<div style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 6px; padding-bottom: 16px">
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+<sc-if value="{{g.visible}}" hint-placeholder-val="{{ true }}">
+<section style="display: flex; flex-direction: column">
+<h2 style="margin: 0; padding: 8px 2px 6px; font-size: 12px; font-weight: 600; color: #5B6663; text-transform: uppercase; letter-spacing: 0.06em">{{g.label}}</h2>
+<div style="background: #FFFFFF; border-radius: 16px; padding: 0 14px">
+<sc-for list="{{g.items}}" as="t" hint-placeholder-count="2">
+<a href="#" style="display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: {{t.divider}}; text-decoration: none; color: #12201E">
+<div style="width: 40px; height: 40px; border-radius: 12px; background: {{t.bg}}; color: {{t.fg}}; display: flex; align-items: center; justify-content: center; flex: none">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{t.icon}}"/></svg>
+</div>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{t.note}}</span>
+<span style="font-size: 12px; color: #5B6663">{{t.category}}</span>
+</div>
+<span style="font-size: 15px; font-weight: 700; color: {{t.amountColor}}; font-variant-numeric: tabular-nums">{{t.amount}}</span>
+</a>
+</sc-for>
+</div>
+</section>
+</sc-if>
+</sc-for>
+</div>
+
+</main>
+
+<a href="TransactionForm.dc.html" aria-label="Add transaction" style="position: absolute; right: 20px; bottom: 92px; width: 60px; height: 60px; border-radius: 20px; border: 0; background: #E07B39; color: #1B0E05; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(18,32,30,0.22); cursor: pointer"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></a>
+
+<nav aria-label="Main" style="height: 76px; flex: none; background: #FFFFFF; border-top: 1px solid #E3E9E7; display: flex; align-items: stretch; padding: 0 6px 6px">
+<a href="Main.dc.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #5B6663; font-size: 11px; font-weight: 500"><span style="padding: 4px 16px; display: flex"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>Dashboard</a>
+<a href="Transactions.dc.html" aria-current="page" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #0F4C45; font-size: 11px; font-weight: 700"><span style="background: #DCEBE6; border-radius: 999px; padding: 4px 16px; display: flex"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/></svg></span>Transactions</a>
+<a href="Budgets.dc.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #5B6663; font-size: 11px; font-weight: 500"><span style="padding: 4px 16px; display: flex"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6.4 6.4"/></svg></span>Budgets</a>
+<a href="Reports.dc.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #5B6663; font-size: 11px; font-weight: 500"><span style="padding: 4px 16px; display: flex"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M7 17v-5M12 17V6M17 17V9"/></svg></span>Reports</a>
+<a href="Settings.dc.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #5B6663; font-size: 11px; font-weight: 500"><span style="padding: 4px 16px; display: flex"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></span>Settings</a>
+</nav>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+var self = this;
+var filter = (this.state && this.state.filter) || 'all';
+var I = {
+food: 'M2 3h3l2.5 12h12L22 7H6M9 20.5h.01M18 20.5h.01',
+transport: 'M4 6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v11H4zM4 11h16M8 21v-4M16 21v-4',
+freelance: 'M4 5h16v11H4zM2 19h20',
+fun: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM10 8.5l5 3.5-5 3.5z',
+health: 'M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z',
+shopping: 'M5 8h14l-1 13H6zM9 8V6a3 3 0 0 1 6 0v2'
+};
+var C = {
+food: { bg: '#FBE6D7', fg: '#9A4A16', icon: I.food, name: 'Food & Groceries' },
+transport: { bg: '#DDEBF3', fg: '#245E80', icon: I.transport, name: 'Transport' },
+freelance: { bg: '#DCEFE5', fg: '#14613F', icon: I.freelance, name: 'Freelance' },
+fun: { bg: '#ECE4F3', fg: '#5B3F7A', icon: I.fun, name: 'Entertainment' },
+health: { bg: '#F7E0E0', fg: '#8E2F2F', icon: I.health, name: 'Health' },
+shopping: { bg: '#FBF0D2', fg: '#7A5B0E', icon: I.shopping, name: 'Shopping' }
+};
+var raw = [
+{ label: 'Today · Sun, 11 Oct', items: [
+['expense', 'food', 'Weekly groceries', '−86.40'],
+['expense', 'transport', 'Ride to the office', '−32.00']
+] },
+{ label: 'Fri, 9 Oct', items: [
+['income', 'freelance', 'Landing page project', '+1,000.00'],
+['expense', 'fun', 'Cinema tickets', '−48.00']
+] },
+{ label: 'Wed, 7 Oct', items: [
+['expense', 'health', 'Pharmacy', '−39.90'],
+['expense', 'shopping', 'Autumn jacket', '−189.90']
+] }
+];
+var groups = raw.map(function (g) {
+var items = g.items.filter(function (r) { return filter === 'all' || r[0] === filter; }).map(function (r, i) {
+var c = C[r[1]];
+return { note: r[2], amount: r[3], category: c.name, bg: c.bg, fg: c.fg, icon: c.icon,
+amountColor: r[0] === 'income' ? '#14613F' : '#B23F0E',
+divider: i === 0 ? '0' : '1px solid #EDF1EF' };
+});
+return { label: g.label, items: items, visible: items.length > 0 };
+});
+var chips = [['all', 'All'], ['income', 'Income'], ['expense', 'Expenses']].map(function (c) {
+var on = c[0] === filter;
+return { label: c[1], pressed: on ? 'true' : 'false',
+bg: on ? '#0F4C45' : '#FFFFFF', fg: on ? '#FFFFFF' : '#12201E', border: on ? '#0F4C45' : '#D3DCD9',
+pick: function () { self.setState({ filter: c[0] }); } };
+});
+return { groups: groups, chips: chips };
+}
+}
+</script>
+</body>
+</html>
