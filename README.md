@@ -2,7 +2,7 @@
 
 A Flutter app for tracking income, expenses and monthly budgets, backed by Firebase.
 
-> Status: **stage 3 — transactions.** Authentication plus adding, editing, deleting and filtering transactions stored in Cloud Firestore. Dashboard, budgets, reports and settings come next.
+> Status: **stage 4 — dashboard.** Authentication, transactions in Cloud Firestore and a dashboard with the all-time balance, monthly totals, spending by category and recent transactions. Budgets, reports and settings come next.
 
 ## Stack
 
@@ -88,7 +88,7 @@ Each user's data lives under `users/{uid}`. Transactions are stored in `users/{u
 | `occurredAt` | timestamp | date of the transaction |
 | `createdAt`, `updatedAt` | timestamp | set by the server |
 
-The list queries one month by `occurredAt`; type, category and note search are applied on the device, so no composite indexes are needed.
+The list queries one month by `occurredAt`; type, category and note search are applied on the device, so no composite indexes are needed. The dashboard's all-time balance listens to all of the user's transactions (served from Firestore's local cache after the first load); for very long histories this would move to a server-maintained running total.
 
 ## Quality checks
 

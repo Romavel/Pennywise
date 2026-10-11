@@ -10,10 +10,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(NavigationBar), findsOneWidget);
-    expect(
-      find.text('Balance, monthly totals and budgets arrive in stage 4.'),
-      findsOneWidget,
-    );
+    expect(find.text('Total balance'), findsOneWidget);
     expect(find.byTooltip('Add transaction'), findsOneWidget);
   });
 

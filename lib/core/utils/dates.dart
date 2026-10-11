@@ -23,6 +23,11 @@ abstract final class Dates {
         : '$relative, ${DateFormat('d MMM y', 'en_US').format(date)}';
   }
 
+  /// `Today`, `Yesterday` or `9 Oct`.
+  static String shortDay(DateTime date, {DateTime? now}) =>
+      _relative(date, now ?? DateTime.now()) ??
+      DateFormat('d MMM', 'en_US').format(date);
+
   static String? _relative(DateTime date, DateTime now) {
     final today = dayOf(now);
     final day = dayOf(date);

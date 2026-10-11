@@ -50,6 +50,12 @@ void main() {
     test('formatSigned uses plus and a real minus sign', () {
       expect(Money.formatSigned(8640, positive: false), '−86.40');
       expect(Money.formatSigned(100000, positive: true), '+1,000.00');
+      expect(Money.formatSigned(0, positive: false), '0.00');
+    });
+
+    test('formatWhole rounds down to whole units', () {
+      expect(Money.formatWhole(341240), '3,412');
+      expect(Money.formatWhole(99), '0');
     });
 
     test('toInput round-trips through parseMinor', () {

@@ -31,9 +31,16 @@ abstract final class Money {
   /// `458299` → `4,582.99`.
   static String format(int minor) => _format.format(minor / 100);
 
-  /// `+4,582.99` / `−4,582.99` (with a real minus sign).
-  static String formatSigned(int minor, {required bool positive}) =>
-      '${positive ? '+' : '−'}${format(minor.abs())}';
+  static final _wholeFormat = NumberFormat('#,##0', 'en_US');
+
+  /// Whole major units, rounded down: `341240` → `3,412`.
+  static String formatWhole(int minor) => _wholeFormat.format(minor ~/ 100);
+
+  /// `+4,582.99` / `−4,582.99` (with a real minus sign); zero has no sign.
+  static String formatSigned(int minor, {required bool positive}) {
+    if (minor == 0) return format(0);
+    return '${positive ? '+' : '−'}${format(minor.abs())}';
+  }
 
   /// Text for an editable amount field: `4599` → `45.99`.
   static String toInput(int minor) =>

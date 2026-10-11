@@ -14,7 +14,6 @@ abstract final class DefaultCategories {
     type: TransactionType.expense,
     icon: Icons.shopping_cart_outlined,
     tone: CategoryPalette.food,
-    chartColor: CategoryPalette.chartFood,
   );
   static const transport = Category(
     id: 'transport',
@@ -23,7 +22,6 @@ abstract final class DefaultCategories {
     type: TransactionType.expense,
     icon: Icons.directions_bus_outlined,
     tone: CategoryPalette.transport,
-    chartColor: CategoryPalette.chartTransport,
   );
   static const housing = Category(
     id: 'housing',
@@ -32,7 +30,6 @@ abstract final class DefaultCategories {
     type: TransactionType.expense,
     icon: Icons.home_outlined,
     tone: CategoryPalette.housing,
-    chartColor: CategoryPalette.chartHousing,
   );
   static const shopping = Category(
     id: 'shopping',
@@ -41,7 +38,6 @@ abstract final class DefaultCategories {
     type: TransactionType.expense,
     icon: Icons.shopping_bag_outlined,
     tone: CategoryPalette.shopping,
-    chartColor: CategoryPalette.chartShopping,
   );
   static const entertainment = Category(
     id: 'entertainment',
@@ -74,7 +70,6 @@ abstract final class DefaultCategories {
     type: TransactionType.expense,
     icon: Icons.more_horiz,
     tone: CategoryPalette.other,
-    chartColor: CategoryPalette.chartOther,
   );
 
   static const salary = Category(

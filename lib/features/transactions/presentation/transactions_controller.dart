@@ -45,6 +45,10 @@ class TransactionFilterNotifier extends Notifier<TransactionFilter> {
         : TransactionSort.newestFirst,
   );
 
+  /// Replaces the whole filter, e.g. when opening the list from the
+  /// dashboard for a given month.
+  void showOnly(TransactionFilter filter) => state = filter;
+
   void clearNarrowing() =>
       state = TransactionFilter(month: state.month, sort: state.sort);
 

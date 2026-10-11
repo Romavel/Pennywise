@@ -42,6 +42,11 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   @override
   Widget build(BuildContext context) {
     final filter = ref.watch(transactionFilterProvider);
+    // Keep the search box in sync when the filter is replaced elsewhere
+    // (e.g. "See all" on the dashboard).
+    ref.listen(transactionFilterProvider, (_, next) {
+      if (next.query != _search.text) _search.text = next.query;
+    });
     final notifier = ref.read(transactionFilterProvider.notifier);
     final list = ref.watch(transactionListProvider);
     final textTheme = Theme.of(context).textTheme;

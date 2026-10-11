@@ -14,7 +14,6 @@ class Category {
     required this.type,
     required this.icon,
     required this.tone,
-    this.chartColor,
   });
 
   final String id;
@@ -25,9 +24,6 @@ class Category {
   final TransactionType type;
   final IconData icon;
   final CategoryTone tone;
-
-  /// Series color in charts; falls back to [CategoryTone.foreground].
-  final Color? chartColor;
 
   @override
   bool operator ==(Object other) => other is Category && other.id == id;

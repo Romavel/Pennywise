@@ -17,6 +17,10 @@ abstract interface class TransactionRepository {
   /// every change, including local writes that are not yet synced.
   Stream<List<Transaction>> watchMonth(Month month);
 
+  /// All transactions of the user, newest first. Used for the all-time
+  /// balance.
+  Stream<List<Transaction>> watchAll();
+
   /// A single transaction, or `null` once it no longer exists.
   Stream<Transaction?> watchById(String id);
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../../../core/utils/dates.dart';
 import '../../../core/utils/money.dart';
 import '../../categories/domain/default_categories.dart';
 import '../../categories/presentation/category_icon.dart';
@@ -12,12 +13,18 @@ class TransactionTile extends StatelessWidget {
     required this.transaction,
     required this.onTap,
     this.showDivider = false,
+    this.showDate = false,
+    this.horizontalPadding = 14,
     super.key,
   });
 
   final Transaction transaction;
   final VoidCallback onTap;
   final bool showDivider;
+
+  /// Adds the date to the subtitle, e.g. "Food & Groceries · Today".
+  final bool showDate;
+  final double horizontalPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +45,10 @@ class TransactionTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: EdgeInsets.symmetric(
+          horizontal: horizontalPadding,
+          vertical: 10,
+        ),
         decoration: BoxDecoration(
           border: showDivider
               ? Border(top: BorderSide(color: colors.divider))
@@ -59,7 +69,12 @@ class TransactionTile extends StatelessWidget {
                     style: textTheme.titleSmall,
                   ),
                   const SizedBox(height: 2),
-                  Text(category.name, style: textTheme.bodySmall),
+                  Text(
+                    showDate
+                        ? '${category.name} · ${Dates.shortDay(transaction.occurredAt)}'
+                        : category.name,
+                    style: textTheme.bodySmall,
+                  ),
                 ],
               ),
             ),

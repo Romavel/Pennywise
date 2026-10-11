@@ -41,6 +41,13 @@ abstract final class AppPalette {
   static const darkWarningBg = Color(0xFF3A2219);
   static const darkWarningFg = Color(0xFFF59A6E);
 
+  // Dashboard hero card (light / dark)
+  static const lightHeroTile = Color(0xFF1A5E56);
+  static const darkHeroTile = Color(0xFF1D5850);
+  static const heroMuted = Color(0xFFCFE3DD);
+  static const heroIncome = Color(0xFFA8EBC9);
+  static const heroExpense = Color(0xFFFFC3A3);
+
   // Shared
   static const accent = Color(0xFFE07B39);
   static const onAccent = Color(0xFF1B0E05);
@@ -54,6 +61,10 @@ class PennywiseColors extends ThemeExtension<PennywiseColors> {
     required this.card,
     required this.heroCard,
     required this.onHeroCard,
+    required this.heroTile,
+    required this.heroMuted,
+    required this.heroIncome,
+    required this.heroExpense,
     required this.mutedText,
     required this.divider,
     required this.track,
@@ -73,6 +84,10 @@ class PennywiseColors extends ThemeExtension<PennywiseColors> {
     card: AppPalette.lightSurface,
     heroCard: AppPalette.lightPrimary,
     onHeroCard: AppPalette.lightOnPrimary,
+    heroTile: AppPalette.lightHeroTile,
+    heroMuted: AppPalette.heroMuted,
+    heroIncome: AppPalette.heroIncome,
+    heroExpense: AppPalette.heroExpense,
     mutedText: AppPalette.lightMuted,
     divider: AppPalette.lightDivider,
     track: AppPalette.lightTrack,
@@ -92,6 +107,10 @@ class PennywiseColors extends ThemeExtension<PennywiseColors> {
     card: AppPalette.darkSurface,
     heroCard: AppPalette.darkHeroCard,
     onHeroCard: AppPalette.darkText,
+    heroTile: AppPalette.darkHeroTile,
+    heroMuted: AppPalette.heroMuted,
+    heroIncome: AppPalette.heroIncome,
+    heroExpense: AppPalette.heroExpense,
     mutedText: AppPalette.darkMuted,
     divider: AppPalette.darkDivider,
     track: AppPalette.darkTrack,
@@ -110,6 +129,10 @@ class PennywiseColors extends ThemeExtension<PennywiseColors> {
   final Color card;
   final Color heroCard;
   final Color onHeroCard;
+  final Color heroTile;
+  final Color heroMuted;
+  final Color heroIncome;
+  final Color heroExpense;
   final Color mutedText;
   final Color divider;
   final Color track;
@@ -129,6 +152,10 @@ class PennywiseColors extends ThemeExtension<PennywiseColors> {
     Color? card,
     Color? heroCard,
     Color? onHeroCard,
+    Color? heroTile,
+    Color? heroMuted,
+    Color? heroIncome,
+    Color? heroExpense,
     Color? mutedText,
     Color? divider,
     Color? track,
@@ -147,6 +174,10 @@ class PennywiseColors extends ThemeExtension<PennywiseColors> {
       card: card ?? this.card,
       heroCard: heroCard ?? this.heroCard,
       onHeroCard: onHeroCard ?? this.onHeroCard,
+      heroTile: heroTile ?? this.heroTile,
+      heroMuted: heroMuted ?? this.heroMuted,
+      heroIncome: heroIncome ?? this.heroIncome,
+      heroExpense: heroExpense ?? this.heroExpense,
       mutedText: mutedText ?? this.mutedText,
       divider: divider ?? this.divider,
       track: track ?? this.track,
@@ -171,6 +202,10 @@ class PennywiseColors extends ThemeExtension<PennywiseColors> {
       card: l(card, other.card),
       heroCard: l(heroCard, other.heroCard),
       onHeroCard: l(onHeroCard, other.onHeroCard),
+      heroTile: l(heroTile, other.heroTile),
+      heroMuted: l(heroMuted, other.heroMuted),
+      heroIncome: l(heroIncome, other.heroIncome),
+      heroExpense: l(heroExpense, other.heroExpense),
       mutedText: l(mutedText, other.mutedText),
       divider: l(divider, other.divider),
       track: l(track, other.track),

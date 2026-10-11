@@ -44,6 +44,13 @@ class FirestoreTransactionRepository implements TransactionRepository {
       .transform(_mapErrors());
 
   @override
+  Stream<List<Transaction>> watchAll() => _collection
+      .orderBy('occurredAt', descending: true)
+      .snapshots()
+      .map((snapshot) => snapshot.docs.map(_fromDoc).nonNulls.toList())
+      .transform(_mapErrors());
+
+  @override
   Stream<Transaction?> watchById(String id) => _collection
       .doc(id)
       .snapshots()

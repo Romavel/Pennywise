@@ -31,6 +31,13 @@ final monthTransactionsProvider = StreamProvider.autoDispose
           ref.watch(transactionRepositoryProvider).watchMonth(month),
     );
 
+/// Every transaction of the user. Firestore serves repeat reads from its
+/// local cache, so this stays cheap for a personal ledger; a server-side
+/// running total would replace it if histories grow very large.
+final allTransactionsProvider = StreamProvider.autoDispose<List<Transaction>>(
+  (ref) => ref.watch(transactionRepositoryProvider).watchAll(),
+);
+
 final transactionProvider = StreamProvider.autoDispose
     .family<Transaction?, String>(
       (ref, id) => ref.watch(transactionRepositoryProvider).watchById(id),

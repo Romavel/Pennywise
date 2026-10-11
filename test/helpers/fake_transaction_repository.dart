@@ -38,6 +38,13 @@ class FakeTransactionRepository implements TransactionRepository {
   });
 
   @override
+  Stream<List<Transaction>> watchAll() => _watch(
+    () =>
+        _items.values.toList()
+          ..sort((a, b) => b.occurredAt.compareTo(a.occurredAt)),
+  );
+
+  @override
   Stream<Transaction?> watchById(String id) => _watch(() => _items[id]);
 
   @override
