@@ -2,51 +2,100 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pennywise/app/router.dart';
 import 'package:pennywise/app/routes.dart';
+import 'package:pennywise/features/auth/domain/app_user.dart';
+
+import '../helpers/fake_auth_repository.dart';
 
 void main() {
   const ready = AsyncData<void>(null);
   const loading = AsyncLoading<void>();
   final failed = AsyncError<void>(Exception('boom'), StackTrace.empty);
 
-  String? redirect(AsyncValue<void> init, String location) =>
-      appRedirect(firebaseInit: init, uri: Uri.parse(location));
+  const signedIn = AsyncData<AppUser?>(testUser);
+  const signedOut = AsyncData<AppUser?>(null);
+  const authLoading = AsyncLoading<AppUser?>();
 
-  group('appRedirect', () {
-    test('sends any page to splash while Firebase is loading', () {
+  String? redirect(
+    String location, {
+    AsyncValue<void> init = ready,
+    AsyncValue<AppUser?> auth = signedIn,
+  }) => appRedirect(firebaseInit: init, auth: auth, uri: Uri.parse(location));
+
+  group('while starting up', () {
+    test('sends any page to splash and remembers it', () {
       expect(
-        redirect(loading, '/budgets/abc'),
+        redirect('/budgets/abc', init: loading),
         '/splash?from=%2Fbudgets%2Fabc',
       );
     });
 
-    test('keeps the user on splash while loading or after an error', () {
-      expect(redirect(loading, AppRoutes.splash), isNull);
-      expect(redirect(failed, '/splash?from=/reports'), isNull);
+    test('waits on splash until the auth state is known', () {
+      expect(redirect('/dashboard', auth: authLoading), startsWith('/splash'));
+      expect(redirect(AppRoutes.splash, auth: authLoading), isNull);
     });
 
-    test('sends to splash after an error', () {
-      expect(redirect(failed, AppRoutes.dashboard), startsWith('/splash'));
-    });
-
-    test('returns to the requested page once ready', () {
-      expect(redirect(ready, '/splash?from=%2Fbudgets%2Fabc'), '/budgets/abc');
-    });
-
-    test('falls back to the dashboard without a safe "from"', () {
-      expect(redirect(ready, AppRoutes.splash), AppRoutes.dashboard);
+    test('stays on splash after a Firebase error', () {
+      expect(redirect('/splash?from=/reports', init: failed), isNull);
       expect(
-        redirect(ready, '/splash?from=https://evil.example'),
-        AppRoutes.dashboard,
+        redirect(AppRoutes.dashboard, init: failed),
+        startsWith('/splash'),
       );
-      expect(
-        redirect(ready, '/splash?from=//evil.example'),
-        AppRoutes.dashboard,
-      );
-      expect(redirect(ready, '/splash?from=/splash'), AppRoutes.dashboard);
+    });
+  });
+
+  group('signed out', () {
+    test('protected pages redirect to auth', () {
+      expect(redirect(AppRoutes.dashboard, auth: signedOut), AppRoutes.auth);
+      expect(redirect('/transactions/t1', auth: signedOut), AppRoutes.auth);
     });
 
-    test('leaves regular pages alone once ready', () {
-      expect(redirect(ready, AppRoutes.transactions), isNull);
+    test('auth screen is allowed', () {
+      expect(redirect(AppRoutes.auth, auth: signedOut), isNull);
+    });
+
+    test('a cold-start deep link is kept through the auth screen', () {
+      expect(
+        redirect('/splash?from=%2Fbudgets%2Fb1', auth: signedOut),
+        '/auth?from=%2Fbudgets%2Fb1',
+      );
+      expect(redirect(AppRoutes.splash, auth: signedOut), AppRoutes.auth);
+    });
+
+    test('an auth stream error counts as signed out', () {
+      final error = AsyncError<AppUser?>(Exception('x'), StackTrace.empty);
+      expect(redirect(AppRoutes.dashboard, auth: error), AppRoutes.auth);
+    });
+  });
+
+  group('signed in', () {
+    test('leaves the auth screen for the remembered page', () {
+      expect(redirect('/auth?from=%2Freports'), '/reports');
+      expect(redirect(AppRoutes.auth), AppRoutes.dashboard);
+    });
+
+    test('leaves splash for the remembered page', () {
+      expect(redirect('/splash?from=%2Fbudgets%2Fabc'), '/budgets/abc');
+      expect(redirect(AppRoutes.splash), AppRoutes.dashboard);
+    });
+
+    test('ignores unsafe or looping "from" values', () {
+      for (final from in [
+        'https://evil.example',
+        '//evil.example',
+        '/splash',
+        '/auth?from=/x',
+      ]) {
+        final location = Uri(
+          path: AppRoutes.auth,
+          queryParameters: {'from': from},
+        ).toString();
+        expect(redirect(location), AppRoutes.dashboard, reason: from);
+      }
+    });
+
+    test('leaves regular pages alone', () {
+      expect(redirect(AppRoutes.transactions), isNull);
+      expect(redirect('/settings/categories'), isNull);
     });
   });
 }

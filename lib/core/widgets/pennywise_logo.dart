@@ -4,9 +4,12 @@ import '../../app/theme/app_colors.dart';
 
 /// App mark: a stack of coins on an orange rounded tile.
 class PennywiseLogo extends StatelessWidget {
-  const PennywiseLogo({this.size = 96, super.key});
+  const PennywiseLogo({this.size = 96, this.elevated = true, super.key});
 
   final double size;
+
+  /// Drop shadow, used on the splash screen.
+  final bool elevated;
 
   @override
   Widget build(BuildContext context) {
@@ -16,13 +19,15 @@ class PennywiseLogo extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppPalette.accent,
         borderRadius: BorderRadius.circular(size * 0.3125),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x40000000),
-            blurRadius: 40,
-            offset: Offset(0, 16),
-          ),
-        ],
+        boxShadow: elevated
+            ? const [
+                BoxShadow(
+                  color: Color(0x40000000),
+                  blurRadius: 40,
+                  offset: Offset(0, 16),
+                ),
+              ]
+            : null,
       ),
       alignment: Alignment.center,
       child: CustomPaint(

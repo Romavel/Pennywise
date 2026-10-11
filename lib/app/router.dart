@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/widgets/app_shell.dart';
+import '../features/auth/data/auth_providers.dart';
+import '../features/auth/domain/app_user.dart';
 import '../features/auth/presentation/auth_screen.dart';
 import '../features/budgets/presentation/budget_detail_screen.dart';
 import '../features/budgets/presentation/budgets_screen.dart';
@@ -19,59 +21,106 @@ import 'routes.dart';
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final initState = ValueNotifier<AsyncValue<void>>(const AsyncLoading());
+  final session = _SessionState();
   ref.listen(
     firebaseInitProvider,
-    (_, next) => initState.value = next,
+    (_, next) => session.firebaseInit = next,
+    fireImmediately: true,
+  );
+  ref.listen(
+    authStateProvider,
+    (_, next) => session.auth = next,
     fireImmediately: true,
   );
 
   final router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: AppRoutes.dashboard,
-    refreshListenable: initState,
-    redirect: (context, state) =>
-        appRedirect(firebaseInit: initState.value, uri: state.uri),
+    refreshListenable: session,
+    redirect: (context, state) => appRedirect(
+      firebaseInit: session.firebaseInit,
+      auth: session.auth,
+      uri: state.uri,
+    ),
     routes: _routes,
   );
 
   ref.onDispose(() {
     router.dispose();
-    initState.dispose();
+    session.dispose();
   });
   return router;
 });
 
-/// Keeps the user on the splash screen until Firebase is ready, then sends
-/// them to the page they originally asked for.
+/// Bridges Riverpod state into go_router's `refreshListenable`.
+class _SessionState extends ChangeNotifier {
+  AsyncValue<void> _firebaseInit = const AsyncLoading();
+  AsyncValue<AppUser?> _auth = const AsyncLoading();
+
+  AsyncValue<void> get firebaseInit => _firebaseInit;
+  set firebaseInit(AsyncValue<void> value) {
+    _firebaseInit = value;
+    notifyListeners();
+  }
+
+  AsyncValue<AppUser?> get auth => _auth;
+  set auth(AsyncValue<AppUser?> value) {
+    _auth = value;
+    notifyListeners();
+  }
+}
+
+/// Route guard:
 ///
-/// Authentication guards are added here in stage 2.
+/// 1. Until Firebase is ready and the auth state is known, stay on splash
+///    (remembering the requested page).
+/// 2. Signed out → `/auth`. Signed in → never `/auth` or splash.
+/// 3. After a cold start or login, continue to the remembered page.
 String? appRedirect({
   required AsyncValue<void> firebaseInit,
+  required AsyncValue<AppUser?> auth,
   required Uri uri,
 }) {
   final onSplash = uri.path == AppRoutes.splash;
-  final ready = firebaseInit.hasValue && !firebaseInit.hasError;
+  final onAuth = uri.path == AppRoutes.auth;
 
-  if (!ready) {
+  final firebaseReady = firebaseInit.hasValue && !firebaseInit.hasError;
+  final authKnown = auth.hasValue || auth.hasError;
+  if (!firebaseReady || !authKnown) {
     if (onSplash) return null;
-    return Uri(
-      path: AppRoutes.splash,
-      queryParameters: {AppRoutes.fromParam: uri.toString()},
-    ).toString();
+    return _withFrom(AppRoutes.splash, uri.toString());
   }
 
-  if (onSplash) {
-    final from = uri.queryParameters[AppRoutes.fromParam];
-    // Only accept in-app paths, never a full URL.
-    final isSafe =
-        from != null &&
-        from.startsWith('/') &&
-        !from.startsWith('//') &&
-        !from.startsWith(AppRoutes.splash);
-    return isSafe ? from : AppRoutes.dashboard;
+  // An auth stream error is treated as signed out.
+  final signedIn = auth.value != null;
+  final from = (onSplash || onAuth) ? _safeFrom(uri) : null;
+
+  if (!signedIn) {
+    if (onAuth) return null;
+    // Remember the page only for a cold start; after signing out, a fresh
+    // login should start on the dashboard.
+    return onSplash && from != null
+        ? _withFrom(AppRoutes.auth, from)
+        : AppRoutes.auth;
   }
+
+  if (onSplash || onAuth) return from ?? AppRoutes.dashboard;
   return null;
+}
+
+String _withFrom(String path, String from) =>
+    Uri(path: path, queryParameters: {AppRoutes.fromParam: from}).toString();
+
+/// Returns the remembered page if it is an in-app path (never a full URL)
+/// and not one of the entry screens.
+String? _safeFrom(Uri uri) {
+  final from = uri.queryParameters[AppRoutes.fromParam];
+  if (from == null || !from.startsWith('/') || from.startsWith('//')) {
+    return null;
+  }
+  final path = Uri.parse(from).path;
+  if (path == AppRoutes.splash || path == AppRoutes.auth) return null;
+  return from;
 }
 
 final _routes = <RouteBase>[

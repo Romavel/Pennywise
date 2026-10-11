@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../../app/providers.dart';
 import '../../../app/routes.dart';
 import '../../../app/theme/app_theme.dart';
+import '../../../core/errors/app_failure.dart';
 import '../../../core/widgets/screen_placeholder.dart';
+import '../../auth/data/auth_providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -13,6 +15,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
+    final user = ref.watch(authStateProvider).value;
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
@@ -20,6 +23,16 @@ class SettingsScreen extends ConsumerWidget {
         title: 'Settings',
         description: 'Profile, currency and account options arrive in stage 6.',
         children: [
+          if (user != null) ...[
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.person_outline),
+                title: Text(user.displayName ?? 'Your account'),
+                subtitle: Text(user.email),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sectionGap),
+          ],
           Text('Theme', style: textTheme.labelMedium),
           const SizedBox(height: 8),
           SegmentedButton<ThemeMode>(
@@ -45,8 +58,24 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () => context.push(AppRoutes.categories),
             ),
           ),
+          const SizedBox(height: AppSpacing.sectionGap),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.logout),
+            label: const Text('Log out'),
+            onPressed: () => _signOut(context, ref),
+          ),
         ],
       ),
     );
+  }
+
+  // The router moves to the auth screen once the auth state changes.
+  Future<void> _signOut(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(authRepositoryProvider).signOut();
+    } on AppFailure catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(e.message)));
+    }
   }
 }

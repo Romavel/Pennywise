@@ -2,7 +2,7 @@
 
 A Flutter app for tracking income, expenses and monthly budgets, backed by Firebase.
 
-> Status: **stage 1 — foundations.** Theme, routing, state management and Firebase bootstrap are in place; feature screens are placeholders.
+> Status: **stage 2 — authentication.** Email/password sign up, log in, password reset, persistent sessions and protected routes work; the remaining feature screens are placeholders.
 
 ## Stack
 
@@ -41,12 +41,15 @@ Views never talk to Firestore directly: presentation → Riverpod providers → 
    ```bash
    flutterfire configure --platforms=android,ios
    ```
-3. Run:
+3. In the Firebase console enable **Authentication → Sign-in method → Email/Password**.
+4. Run:
    ```bash
    flutter run
    ```
 
 Until step 2 is done the splash screen shows a "Firebase is not configured" message.
+
+`lib/firebase_options.dart` and `android/app/google-services.json` are committed. They identify the Firebase project and are not secrets; access to data is enforced by Firebase Authentication and Firestore Security Rules. Restrict the API keys to the app in Google Cloud Console before a public release.
 
 ### Build configuration
 
