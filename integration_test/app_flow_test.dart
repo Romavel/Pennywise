@@ -166,7 +166,22 @@ extension on WidgetTester {
       if (finder.evaluate().isNotEmpty) return;
       await Future<void>.delayed(const Duration(milliseconds: 100));
     }
-    throw TestFailure('Timed out after $timeout waiting for $finder');
+    // Say what is on screen instead, so a CI failure explains itself.
+    final visible = find
+        .byType(Text)
+        .evaluate()
+        .map(
+          (e) =>
+              (e.widget as Text).data ??
+              (e.widget as Text).textSpan?.toPlainText(),
+        )
+        .whereType<String>()
+        .where((t) => t.trim().isNotEmpty)
+        .take(40)
+        .join(' | ');
+    throw TestFailure(
+      'Timed out after $timeout waiting for $finder\nOn screen: $visible',
+    );
   }
 
   /// Lets animations finish without waiting on spinners forever.
