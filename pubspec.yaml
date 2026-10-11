@@ -31,3 +31,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    # Bundled so the app never fetches fonts at runtime (works offline).
+    - assets/google_fonts/
+    - assets/licenses/
