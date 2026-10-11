@@ -31,6 +31,7 @@ class BudgetsScreen extends ConsumerWidget {
     final taken = {
       for (final p in overview.value?.items ?? const <BudgetProgress>[])
         p.budget.categoryId,
+      if (overview.value?.overall != null) Budget.overallCategoryId,
     };
 
     return Scaffold(
@@ -137,12 +138,30 @@ class BudgetsScreen extends ConsumerWidget {
       ),
       sliver: SliverList.list(
         children: [
-          _SummaryCard(overview: data, currency: currency),
+          _SummaryCard(
+            overview: data,
+            currency: currency,
+            onTap: data.overall == null
+                ? null
+                : () => context.push(
+                    AppRoutes.budgetDetail(data.overall!.budget.id),
+                  ),
+          ),
+          if (data.categoryLimitsExceedOverall) ...[
+            const SizedBox(height: 10),
+            _Hint(
+              'Your category limits add up to $currency '
+              '${Money.format(data.categoryLimitsMinor)}, more than the '
+              'overall budget.',
+            ),
+          ],
           if (overLimit.isNotEmpty) ...[
             const SizedBox(height: 14),
             OverLimitBanner(overLimit: overLimit, currency: currency),
           ],
           const SizedBox(height: 14),
+          if (data.items.isEmpty)
+            const _Hint('Add category budgets to see where the money goes.'),
           for (final p in data.items) ...[
             BudgetRow(
               progress: p,
@@ -158,10 +177,17 @@ class BudgetsScreen extends ConsumerWidget {
 }
 
 class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({required this.overview, required this.currency});
+  const _SummaryCard({
+    required this.overview,
+    required this.currency,
+    this.onTap,
+  });
 
   final BudgetOverview overview;
   final String currency;
+
+  /// Opens the overall budget, when there is one.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -170,65 +196,93 @@ class _SummaryCard extends StatelessWidget {
     final over = remaining < 0;
     final textTheme = Theme.of(context).textTheme;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: colors.heroCard,
+    return Material(
+      color: colors.heroCard,
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
         borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            over ? 'Over budget this month' : 'Left to spend this month',
-            style: textTheme.labelMedium?.copyWith(color: colors.heroMuted),
-          ),
-          const SizedBox(height: 12),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              '$currency ${Money.format(remaining.abs())}',
-              style: GoogleFonts.bricolageGrotesque(
-                fontSize: 34,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.68,
-                color: over ? colors.heroExpense : colors.onHeroCard,
-                fontFeatures: AppTypography.tabularFigures,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          BudgetBar(
-            ratio: overview.ratio,
-            height: 10,
-            color: over ? colors.heroExpense : colors.heroIncome,
-            trackColor: colors.heroTile,
-          ),
-          const SizedBox(height: 12),
-          Row(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      over
+                          ? 'Over budget this month'
+                          : 'Left to spend this month',
+                      style: textTheme.labelMedium?.copyWith(
+                        color: colors.heroMuted,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    overview.overall != null
+                        ? 'Overall budget'
+                        : 'Sum of category budgets',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colors.heroMuted,
+                    ),
+                  ),
+                  if (onTap != null)
+                    Icon(
+                      Icons.chevron_right,
+                      size: 18,
+                      color: colors.heroMuted,
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
                 child: Text(
-                  'Spent ${Money.format(overview.spentMinor)} '
-                  'of ${Money.format(overview.limitMinor)}',
-                  style: textTheme.labelMedium?.copyWith(
-                    color: colors.heroMuted,
+                  '$currency ${Money.format(remaining.abs())}',
+                  style: GoogleFonts.bricolageGrotesque(
+                    fontSize: 34,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.68,
+                    color: over ? colors.heroExpense : colors.onHeroCard,
                     fontFeatures: AppTypography.tabularFigures,
                   ),
                 ),
               ),
-              Text(
-                '${overview.percent}%',
-                style: textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: colors.onHeroCard,
-                  fontFeatures: AppTypography.tabularFigures,
-                ),
+              const SizedBox(height: 12),
+              BudgetBar(
+                ratio: overview.ratio,
+                height: 10,
+                color: over ? colors.heroExpense : colors.heroIncome,
+                trackColor: colors.heroTile,
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Spent ${Money.format(overview.spentMinor)} '
+                      'of ${Money.format(overview.limitMinor)}',
+                      style: textTheme.labelMedium?.copyWith(
+                        color: colors.heroMuted,
+                        fontFeatures: AppTypography.tabularFigures,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '${overview.percent}%',
+                    style: textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: colors.onHeroCard,
+                      fontFeatures: AppTypography.tabularFigures,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -286,4 +340,25 @@ class _EmptyBudgets extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _Hint extends StatelessWidget {
+  const _Hint(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 4),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(Icons.info_outline, size: 16, color: context.pwColors.mutedText),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(text, style: Theme.of(context).textTheme.bodySmall),
+        ),
+      ],
+    ),
+  );
 }

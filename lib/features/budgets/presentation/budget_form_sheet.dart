@@ -14,6 +14,7 @@ import '../../categories/domain/default_categories.dart';
 import '../../categories/presentation/category_icon.dart';
 import '../../transactions/data/transaction_providers.dart';
 import '../domain/budget.dart';
+import 'budget_category.dart';
 import 'budgets_controller.dart';
 
 enum BudgetSheetResult { saved, deleted }
@@ -67,9 +68,11 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
 
   bool get _isEditing => widget.existing != null;
 
-  List<Category> get _available => DefaultCategories.expense
-      .where((c) => !widget.takenCategoryIds.contains(c.id))
-      .toList();
+  /// The overall budget first, then expense categories without a budget.
+  List<Category> get _available => [
+    overallBudgetCategory,
+    ...DefaultCategories.expense,
+  ].where((c) => !widget.takenCategoryIds.contains(c.id)).toList();
 
   String? get _limitError {
     final minor = Money.parseMinor(_limit.text.trim());
@@ -162,9 +165,9 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
     final busy = state.isLoading;
     final textTheme = Theme.of(context).textTheme;
     final colors = context.pwColors;
-    final currency = widget.existing?.currency ?? ref.watch(currencyProvider);
+    final String currency = widget.existing?.currency ?? ref.watch(currencyProvider);
     final existingCategory = _isEditing
-        ? DefaultCategories.byId(widget.existing!.categoryId)
+        ? categoryForBudget(widget.existing!.categoryId)
         : null;
 
     return Padding(
@@ -191,7 +194,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
             const SizedBox(height: 18),
             if (!_isEditing) ...[
               Text(
-                'Category',
+                'Budget for',
                 style: textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -199,7 +202,8 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
               const SizedBox(height: 8),
               if (_available.isEmpty)
                 Text(
-                  'Every expense category already has a budget this month.',
+                  'Every category and the overall budget are already set '
+                  'for this month.',
                   style: textTheme.bodyMedium?.copyWith(
                     color: colors.mutedText,
                   ),
@@ -223,6 +227,13 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                 const SizedBox(height: 6),
                 _FieldError(_categoryError!),
               ],
+              if (_categoryId == Budget.overallCategoryId && !_isEditing) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Limits all of this month’s spending, whatever the category.',
+                  style: textTheme.bodySmall,
+                ),
+              ],
               const SizedBox(height: 18),
             ],
             Text(
@@ -245,7 +256,12 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
               onSubmitted: (_) => _save(),
               decoration: InputDecoration(
                 hintText: '0.00',
-                prefixText: '$currency ',
+                // Always visible, unlike prefixText (only shown when focused).
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.only(left: 16, right: 8),
+                  child: Text(currency, style: textTheme.bodyLarge),
+                ),
+                prefixIconConstraints: const BoxConstraints(),
                 errorText: _showErrors ? _limitError : null,
               ),
             ),

@@ -4,9 +4,9 @@ import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../core/utils/money.dart';
-import '../../categories/domain/default_categories.dart';
 import '../../categories/presentation/category_icon.dart';
 import '../domain/budget_progress.dart';
+import 'budget_category.dart';
 
 extension BudgetStatusColors on BudgetStatus {
   Color color(PennywiseColors colors) => switch (this) {
@@ -75,7 +75,7 @@ class BudgetRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.pwColors;
     final textTheme = Theme.of(context).textTheme;
-    final category = DefaultCategories.byId(progress.budget.categoryId);
+    final category = categoryForBudget(progress.budget.categoryId);
     final status = progress.status;
     final statusColor = status.color(colors);
     final over = status == BudgetStatus.over;
@@ -167,7 +167,7 @@ class OverLimitBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.pwColors;
     final text = overLimit.length == 1
-        ? '${DefaultCategories.byId(overLimit.single.budget.categoryId).name} '
+        ? '${categoryForBudget(overLimit.single.budget.categoryId).name} '
               'is over its limit by $currency '
               '${Money.format(overLimit.single.overMinor)}'
         : '${overLimit.length} budgets are over their limits';

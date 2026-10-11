@@ -107,6 +107,77 @@ void main() {
     expect(find.text('PLN 842.60 of 1,200.00'), findsOneWidget);
   });
 
+  testWidgets('creates an overall budget for all spending', (tester) async {
+    final repos = await _openBudgets(
+      tester,
+      budgets: [_budget('food', 120000)],
+    );
+    expect(find.text('Sum of category budgets'), findsOneWidget);
+
+    await tester.tap(find.text('New budget'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Overall budget'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Limits all of this month’s spending, whatever the category.'),
+      findsOneWidget,
+    );
+    await tester.enterText(find.byKey(const Key('budget-limit-field')), '3000');
+    await tester.tap(find.text('Create budget'));
+    await tester.pumpAndSettle();
+
+    expect(
+      repos.budgets.items.map((b) => b.id),
+      contains(Budget.idFor(_month, Budget.overallCategoryId)),
+    );
+    // The summary now uses the overall budget and every expense:
+    // 3,000.00 - (1,650.00 + 842.60 + 310.00).
+    expect(find.text('Overall budget'), findsOneWidget);
+    expect(find.text('PLN 197.40'), findsOneWidget);
+    expect(find.text('Spent 2,802.60 of 3,000.00'), findsOneWidget);
+    // The overall budget is no longer offered.
+    await tester.tap(find.text('New budget'));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.text('Overall budget'),
+      ),
+      findsNothing,
+    );
+  });
+
+  testWidgets('warns when the overall budget is exceeded and opens it', (
+    tester,
+  ) async {
+    await _openBudgets(
+      tester,
+      budgets: [
+        _budget(Budget.overallCategoryId, 250000),
+        _budget('housing', 170000),
+        _budget('food', 120000),
+      ],
+    );
+
+    expect(find.text('Over budget this month'), findsOneWidget);
+    expect(
+      find.text('Overall budget is over its limit by PLN 302.60'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('category limits add up to PLN 2,900.00'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Over budget this month'));
+    await tester.pumpAndSettle();
+    expect(find.text('Overall budget'), findsOneWidget);
+    expect(find.text('PLN 2,802.60'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Fuel'), 200);
+    expect(find.text('Expenses'), findsOneWidget);
+    expect(find.text('Rent'), findsOneWidget);
+  });
+
   testWidgets('only offers categories without a budget', (tester) async {
     await _openBudgets(tester, budgets: [_budget('food', 1000)]);
 

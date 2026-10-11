@@ -10,15 +10,17 @@ List<Month> monthsEndingAt(Month last, int count) {
   return months;
 }
 
-/// Expenses of [categoryId] per month, oldest first.
+/// Expenses of [categoryId] per month, oldest first. A `null` category
+/// counts all expenses.
 List<({Month month, int spentMinor})> categorySpendingByMonth(
   Iterable<Transaction> transactions, {
-  required String categoryId,
+  required String? categoryId,
   required List<Month> months,
 }) {
   final totals = {for (final m in months) m: 0};
   for (final t in transactions) {
-    if (t.isIncome || t.categoryId != categoryId) continue;
+    if (t.isIncome) continue;
+    if (categoryId != null && t.categoryId != categoryId) continue;
     final month = Month.of(t.occurredAt);
     if (totals.containsKey(month)) {
       totals[month] = totals[month]! + t.amountMinor;

@@ -84,6 +84,11 @@ describe('budgets: validation', () => {
   rejects('a lowercase currency', { currency: 'pln' });
   rejects('extra fields', { spentMinor: 5 });
 
+  test('accepts the overall budget', () =>
+    assertSucceeds(
+      setDoc(doc(alice(), budgetPath('alice', '2026-10_total')), validBudget({ categoryId: 'total' })),
+    ));
+
   test('a batch copying several budgets succeeds', async () => {
     const db = alice();
     const batch = writeBatch(db);

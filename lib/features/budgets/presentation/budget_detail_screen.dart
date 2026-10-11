@@ -12,7 +12,6 @@ import '../../../app/theme/app_typography.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/utils/month.dart';
 import '../../../core/widgets/state_views.dart';
-import '../../categories/domain/default_categories.dart';
 import '../../transactions/data/transaction_providers.dart';
 import '../../transactions/domain/transaction.dart';
 import '../../transactions/presentation/transaction_tile.dart';
@@ -20,6 +19,7 @@ import '../data/budget_providers.dart';
 import '../domain/budget.dart';
 import '../domain/budget_progress.dart';
 import '../domain/category_history.dart';
+import 'budget_category.dart';
 import 'budget_form_sheet.dart';
 import 'budget_widgets.dart';
 
@@ -91,11 +91,11 @@ class _BudgetDetail extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final category = DefaultCategories.byId(budget.categoryId);
+    final category = categoryForBudget(budget.categoryId);
     final progress = BudgetProgress.of(budget, transactions);
     final history = categorySpendingByMonth(
       transactions,
-      categoryId: budget.categoryId,
+      categoryId: budget.isOverall ? null : budget.categoryId,
       months: monthsEndingAt(budget.month, _historyLength),
     );
     final monthTransactions =
@@ -103,7 +103,7 @@ class _BudgetDetail extends ConsumerWidget {
             .where(
               (t) =>
                   !t.isIncome &&
-                  t.categoryId == budget.categoryId &&
+                  (budget.isOverall || t.categoryId == budget.categoryId) &&
                   budget.month.contains(t.occurredAt),
             )
             .toList()
@@ -185,16 +185,20 @@ class _BudgetDetail extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 6, bottom: 8),
-                    child: _CardTitle('Transactions'),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6, bottom: 8),
+                    child: _CardTitle(
+                      budget.isOverall ? 'Expenses' : 'Transactions',
+                    ),
                   ),
                   if (monthTransactions.isEmpty)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 10),
                       child: Text(
-                        'No ${category.name.toLowerCase()} expenses '
-                        'in ${budget.month.monthName}.',
+                        budget.isOverall
+                            ? 'No expenses in ${budget.month.monthName}.'
+                            : 'No ${category.name.toLowerCase()} expenses '
+                                  'in ${budget.month.monthName}.',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: colors.mutedText,
                         ),

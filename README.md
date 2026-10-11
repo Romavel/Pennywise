@@ -92,13 +92,13 @@ Budgets are stored in `users/{uid}/budgets/{yyyy-MM}_{categoryId}`, so each cate
 
 | Field | Type | Notes |
 |---|---|---|
-| `categoryId` | string | expense category |
+| `categoryId` | string | expense category, or `total` for the overall budget |
 | `monthKey` | string | `yyyy-MM` |
 | `limitMinor` | int | monthly limit in the smallest currency unit, > 0 |
 | `currency` | string | ISO 4217 code |
 | `createdAt`, `updatedAt` | timestamp | set by the server |
 
-Only `limitMinor` can change after creation. Spending against a budget is computed on the device from that month's expenses (by transaction date); income never reduces it, and going over a limit never blocks adding transactions.
+The overall budget (`categoryId: total`) limits all expenses of the month; when it is set it drives the month's totals, otherwise they are the sum of the category budgets. Only `limitMinor` can change after creation. Spending against a budget is computed on the device from that month's expenses (by transaction date); income never reduces it, and going over a limit never blocks adding transactions.
 
 The list queries one month by `occurredAt`; type, category and note search are applied on the device, so no composite indexes are needed. The dashboard's all-time balance listens to all of the user's transactions (served from Firestore's local cache after the first load); for very long histories this would move to a server-maintained running total.
 

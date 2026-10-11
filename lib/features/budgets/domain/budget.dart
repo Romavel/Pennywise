@@ -14,12 +14,20 @@ class Budget {
     this.updatedAt,
   });
 
+  /// The category this budget limits, or [overallCategoryId] for the
+  /// overall budget that covers all spending.
   final String categoryId;
   final Month month;
   final int limitMinor;
   final String currency;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+
+  /// Reserved category id of the overall monthly budget. No real category
+  /// may use it.
+  static const overallCategoryId = 'total';
+
+  bool get isOverall => categoryId == overallCategoryId;
 
   /// One budget per category and month, so the id is derived from both.
   /// This also makes "create" idempotent and duplicates impossible.
