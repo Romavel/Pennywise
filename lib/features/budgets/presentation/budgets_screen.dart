@@ -19,6 +19,7 @@ import '../domain/budget_progress.dart';
 import 'budget_form_sheet.dart';
 import 'budget_widgets.dart';
 import 'budgets_controller.dart';
+import '../../settings/data/profile_providers.dart';
 
 class BudgetsScreen extends ConsumerWidget {
   const BudgetsScreen({super.key});

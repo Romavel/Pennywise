@@ -2,11 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/month.dart';
-import '../../categories/domain/default_categories.dart';
 import '../data/transaction_providers.dart';
 import '../domain/transaction.dart';
 import '../domain/transaction_filter.dart';
 import '../domain/transaction_repository.dart';
+import '../../categories/data/category_providers.dart';
 
 /// Filters of the transaction list. Kept while the user switches tabs.
 final transactionFilterProvider =
@@ -52,9 +52,11 @@ class TransactionFilterNotifier extends Notifier<TransactionFilter> {
   void clearNarrowing() =>
       state = TransactionFilter(month: state.month, sort: state.sort);
 
-  static bool _matches(String categoryId, TransactionType type) =>
-      !DefaultCategories.exists(categoryId) ||
-      DefaultCategories.byId(categoryId).type == type;
+  bool _matches(String categoryId, TransactionType type) {
+    final catalog = ref.read(categoryCatalogProvider);
+    return !catalog.contains(categoryId) ||
+        catalog.byId(categoryId).type == type;
+  }
 }
 
 /// What the list shows for the current filter.

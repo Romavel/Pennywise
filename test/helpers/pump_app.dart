@@ -6,10 +6,13 @@ import 'package:pennywise/app/providers.dart';
 import 'package:pennywise/core/config/app_config.dart';
 import 'package:pennywise/features/auth/data/auth_providers.dart';
 import 'package:pennywise/features/budgets/data/budget_providers.dart';
+import 'package:pennywise/features/categories/data/category_providers.dart';
+import 'package:pennywise/features/settings/data/profile_providers.dart';
 import 'package:pennywise/features/transactions/data/transaction_providers.dart';
 
 import 'fake_auth_repository.dart';
 import 'fake_budget_repository.dart';
+import 'fake_settings_repositories.dart';
 import 'fake_transaction_repository.dart';
 
 const testConfig = AppConfig(
@@ -21,7 +24,7 @@ const testConfig = AppConfig(
 /// Pumps the whole app with Firebase replaced by fakes.
 ///
 /// [firebaseInit] succeeds immediately by default; [auth] defaults to a
-/// repository with [testUser] signed in; [transactions] and [budgets] to
+/// repository with [testUser] signed in; the data repositories default to
 /// empty ones.
 Future<FakeAuthRepository> pumpPennywise(
   WidgetTester tester, {
@@ -29,6 +32,9 @@ Future<FakeAuthRepository> pumpPennywise(
   FakeAuthRepository? auth,
   FakeTransactionRepository? transactions,
   FakeBudgetRepository? budgets,
+  FakeProfileRepository? profile,
+  FakeCategoryRepository? categories,
+  FakeAccountRepository? account,
 }) async {
   final authRepository = auth ?? FakeAuthRepository(currentUser: testUser);
   // Phone-sized viewport, matching the 390×844 design frame.
@@ -49,6 +55,15 @@ Future<FakeAuthRepository> pumpPennywise(
         ),
         budgetRepositoryProvider.overrideWithValue(
           budgets ?? FakeBudgetRepository(),
+        ),
+        profileRepositoryProvider.overrideWithValue(
+          profile ?? FakeProfileRepository(),
+        ),
+        categoryRepositoryProvider.overrideWithValue(
+          categories ?? FakeCategoryRepository(),
+        ),
+        accountRepositoryProvider.overrideWithValue(
+          account ?? FakeAccountRepository(authRepository),
         ),
       ],
       child: const PennywiseApp(),

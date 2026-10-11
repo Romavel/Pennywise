@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/category_palette.dart';
 import '../../categories/domain/category.dart';
-import '../../categories/domain/default_categories.dart';
+import '../../categories/domain/category_catalog.dart';
 import '../../transactions/domain/transaction.dart';
 import '../domain/budget.dart';
 
@@ -17,7 +17,7 @@ const overallBudgetCategory = Category(
 );
 
 /// The category a budget is for, or [overallBudgetCategory].
-Category categoryForBudget(String categoryId) =>
+Category categoryForBudget(CategoryCatalog catalog, String categoryId) =>
     categoryId == Budget.overallCategoryId
     ? overallBudgetCategory
-    : DefaultCategories.byId(categoryId);
+    : catalog.byId(categoryId);

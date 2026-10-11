@@ -64,10 +64,7 @@ void main() {
 
     await tester.tap(find.text('Categories'));
     await tester.pumpAndSettle();
-    expect(
-      find.text('Built-in and custom categories arrive in stage 6.'),
-      findsOneWidget,
-    );
+    expect(find.text('New category'), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
   });
 }

@@ -22,6 +22,7 @@ import '../domain/category_history.dart';
 import 'budget_category.dart';
 import 'budget_form_sheet.dart';
 import 'budget_widgets.dart';
+import '../../categories/data/category_providers.dart';
 
 class BudgetDetailScreen extends ConsumerStatefulWidget {
   const BudgetDetailScreen({required this.budgetId, super.key});
@@ -91,7 +92,10 @@ class _BudgetDetail extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final category = categoryForBudget(budget.categoryId);
+    final category = categoryForBudget(
+      ref.watch(categoryCatalogProvider),
+      budget.categoryId,
+    );
     final progress = BudgetProgress.of(budget, transactions);
     final history = categorySpendingByMonth(
       transactions,

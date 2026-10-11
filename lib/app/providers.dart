@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/config/app_config.dart';
@@ -18,16 +17,3 @@ final firebaseInitProvider = FutureProvider<void>(
   (ref) => initializeFirebase(ref.watch(appConfigProvider)),
   retry: (retryCount, error) => null,
 );
-
-/// Current theme mode. Kept in memory for now; the settings feature will
-/// persist it in the user's preferences.
-final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(
-  ThemeModeNotifier.new,
-);
-
-class ThemeModeNotifier extends Notifier<ThemeMode> {
-  @override
-  ThemeMode build() => ThemeMode.system;
-
-  void set(ThemeMode mode) => state = mode;
-}

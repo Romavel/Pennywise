@@ -10,12 +10,13 @@ import '../../../core/utils/month.dart';
 import '../../../core/widgets/error_banner.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../categories/domain/category.dart';
-import '../../categories/domain/default_categories.dart';
 import '../../categories/presentation/category_icon.dart';
-import '../../transactions/data/transaction_providers.dart';
 import '../domain/budget.dart';
 import 'budget_category.dart';
 import 'budgets_controller.dart';
+import '../../settings/data/profile_providers.dart';
+import '../../categories/data/category_providers.dart';
+import '../../transactions/domain/transaction.dart';
 
 enum BudgetSheetResult { saved, deleted }
 
@@ -71,7 +72,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
   /// The overall budget first, then expense categories without a budget.
   List<Category> get _available => [
     overallBudgetCategory,
-    ...DefaultCategories.expense,
+    ...ref.read(categoryCatalogProvider).forType(TransactionType.expense),
   ].where((c) => !widget.takenCategoryIds.contains(c.id)).toList();
 
   String? get _limitError {
@@ -165,9 +166,13 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
     final busy = state.isLoading;
     final textTheme = Theme.of(context).textTheme;
     final colors = context.pwColors;
-    final String currency = widget.existing?.currency ?? ref.watch(currencyProvider);
+    final String currency =
+        widget.existing?.currency ?? ref.watch(currencyProvider);
     final existingCategory = _isEditing
-        ? categoryForBudget(widget.existing!.categoryId)
+        ? categoryForBudget(
+            ref.watch(categoryCatalogProvider),
+            widget.existing!.categoryId,
+          )
         : null;
 
     return Padding(

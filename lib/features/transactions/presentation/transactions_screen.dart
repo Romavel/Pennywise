@@ -8,13 +8,14 @@ import '../../../app/theme/app_theme.dart';
 import '../../../core/utils/dates.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/state_views.dart';
-import '../../categories/domain/default_categories.dart';
 import '../../categories/presentation/category_icon.dart';
 import '../data/transaction_providers.dart';
 import '../domain/transaction.dart';
 import '../domain/transaction_filter.dart';
 import 'transaction_tile.dart';
 import 'transactions_controller.dart';
+import '../../categories/data/category_providers.dart';
+import '../../categories/domain/category_catalog.dart';
 
 class TransactionsScreen extends ConsumerStatefulWidget {
   const TransactionsScreen({super.key});
@@ -385,7 +386,7 @@ class _FilterBar extends ConsumerWidget {
     final notifier = ref.read(transactionFilterProvider.notifier);
     final category = filter.categoryId == null
         ? null
-        : DefaultCategories.byId(filter.categoryId!);
+        : ref.watch(categoryCatalogProvider).byId(filter.categoryId!);
 
     return Semantics(
       label: 'Filter transactions',
@@ -408,7 +409,11 @@ class _FilterBar extends ConsumerWidget {
             label: category?.name ?? 'Category',
             selected: category != null,
             trailing: Icons.expand_more,
-            onTap: () => _pickCategory(context, notifier),
+            onTap: () => _pickCategory(
+              context,
+              notifier,
+              ref.read(categoryCatalogProvider),
+            ),
           ),
         ],
       ),
@@ -418,10 +423,11 @@ class _FilterBar extends ConsumerWidget {
   Future<void> _pickCategory(
     BuildContext context,
     TransactionFilterNotifier notifier,
+    CategoryCatalog catalog,
   ) async {
     final categories = filter.type == null
-        ? DefaultCategories.all
-        : DefaultCategories.forType(filter.type!);
+        ? catalog.all
+        : catalog.forType(filter.type!);
 
     final picked = await showModalBottomSheet<({String? id})>(
       context: context,

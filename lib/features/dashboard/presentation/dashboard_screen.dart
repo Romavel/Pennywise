@@ -11,8 +11,6 @@ import '../../../core/utils/money.dart';
 import '../../../core/utils/month.dart';
 import '../../../core/widgets/month_switcher.dart';
 import '../../../core/widgets/state_views.dart';
-import '../../auth/data/auth_providers.dart';
-import '../../auth/domain/app_user.dart';
 import '../../budgets/domain/budget_progress.dart';
 import '../../budgets/presentation/budget_widgets.dart';
 import '../../budgets/presentation/budgets_controller.dart';
@@ -23,6 +21,7 @@ import '../../transactions/presentation/transactions_controller.dart';
 import '../domain/dashboard_summary.dart';
 import 'dashboard_controller.dart';
 import 'spending_chart.dart';
+import '../../settings/data/profile_providers.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -31,11 +30,11 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final month = ref.watch(dashboardMonthProvider);
     final summary = ref.watch(dashboardSummaryProvider);
-    final user = ref.watch(authStateProvider).value;
+    final name = ref.watch(profileProvider)?.displayName ?? '';
     final monthNotifier = ref.read(dashboardMonthProvider.notifier);
 
     final header = <Widget>[
-      _Greeting(user: user),
+      _Greeting(name: name),
       const SizedBox(height: 18),
       MonthSwitcher(
         month: month,
@@ -161,9 +160,9 @@ class DashboardScreen extends ConsumerWidget {
 }
 
 class _Greeting extends StatelessWidget {
-  const _Greeting({required this.user});
+  const _Greeting({required this.name});
 
-  final AppUser? user;
+  final String name;
 
   static String _salutation(DateTime now) => switch (now.hour) {
     < 12 => 'Good morning,',
@@ -173,9 +172,6 @@ class _Greeting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = (user?.displayName?.trim().isNotEmpty ?? false)
-        ? user!.displayName!.trim()
-        : (user?.email.split('@').first ?? '');
     final scheme = Theme.of(context).colorScheme;
 
     return Row(

@@ -9,6 +9,36 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == uid;
     }
 
+    // Profile and preferences. Only the deleteAccount Cloud Function (Admin
+    // SDK, which bypasses these rules) removes it.
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && isValidProfile(request.resource.data)
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    // A built-in id holds the user's name for that category; a "custom_…"
+    // id holds a category the user created.
+    match /users/{uid}/categories/{categoryId} {
+      allow read, delete: if isOwner(uid);
+
+      allow create: if isOwner(uid) && (
+        (isBuiltInCategory(categoryId) && isValidRename(request.resource.data))
+        || (isCustomCategoryId(categoryId)
+            && isValidCustomCategory(request.resource.data)
+            && request.resource.data.createdAt == request.time
+            && request.resource.data.updatedAt == request.time));
+
+      allow update: if isOwner(uid) && (
+        (isBuiltInCategory(categoryId) && isValidRename(request.resource.data))
+        || (isCustomCategoryId(categoryId)
+            && isValidCustomCategory(request.resource.data)
+            && request.resource.data.createdAt == resource.data.createdAt
+            && request.resource.data.type == resource.data.type
+            && request.resource.data.updatedAt == request.time));
+    }
+
     match /users/{uid}/transactions/{transactionId} {
       allow read: if isOwner(uid);
 
@@ -24,6 +54,49 @@ service cloud.firestore {
         && request.resource.data.updatedAt == request.time;
 
       allow delete: if isOwner(uid);
+    }
+
+    function isValidProfile(data) {
+      let fields = ['displayName', 'currency', 'themeMode', 'updatedAt'];
+      return data.keys().hasAll(fields)
+        && data.keys().hasOnly(fields)
+        && data.displayName is string
+        && data.displayName.size() > 0
+        && data.displayName.size() <= 40
+        && data.currency is string
+        && data.currency.matches('^[A-Z]{3}$')
+        && data.themeMode in ['system', 'light', 'dark'];
+    }
+
+    function isBuiltInCategory(id) {
+      return id in ['food', 'transport', 'housing', 'shopping', 'entertainment',
+                    'health', 'education', 'other', 'salary', 'freelance',
+                    'investments', 'other_income'];
+    }
+
+    function isCustomCategoryId(id) {
+      return id.matches('^custom_[a-z0-9]{8,32}$');
+    }
+
+    function isValidCategoryName(name) {
+      return name is string && name.size() > 0 && name.size() <= 30;
+    }
+
+    function isValidRename(data) {
+      return data.keys().hasAll(['name', 'updatedAt'])
+        && data.keys().hasOnly(['name', 'updatedAt'])
+        && isValidCategoryName(data.name)
+        && data.updatedAt == request.time;
+    }
+
+    function isValidCustomCategory(data) {
+      let fields = ['name', 'type', 'icon', 'tone', 'createdAt', 'updatedAt'];
+      return data.keys().hasAll(fields)
+        && data.keys().hasOnly(fields)
+        && isValidCategoryName(data.name)
+        && data.type in ['income', 'expense']
+        && data.icon is string && data.icon.matches('^[a-z_]{1,24}$')
+        && data.tone is string && data.tone.matches('^[a-z_]{1,24}$');
     }
 
     // One budget per category and month: the id is "{monthKey}_{categoryId}".

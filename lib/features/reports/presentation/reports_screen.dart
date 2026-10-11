@@ -14,12 +14,13 @@ import '../../../core/widgets/segmented_switch.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../budgets/data/budget_providers.dart';
 import '../../budgets/presentation/budget_widgets.dart';
-import '../../categories/domain/default_categories.dart';
 import '../../dashboard/domain/spending_breakdown.dart';
 import '../../dashboard/presentation/spending_chart.dart';
 import '../../transactions/data/transaction_providers.dart';
 import '../domain/report.dart';
 import 'reports_controller.dart';
+import '../../settings/data/profile_providers.dart';
+import '../../categories/data/category_providers.dart';
 
 class ReportsScreen extends ConsumerWidget {
   const ReportsScreen({super.key});
@@ -467,14 +468,15 @@ class _IncomeExpenseChart extends StatelessWidget {
   }
 }
 
-class _TopCategories extends StatelessWidget {
+class _TopCategories extends ConsumerWidget {
   const _TopCategories({required this.report, required this.currency});
 
   final Report report;
   final String currency;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final catalog = ref.watch(categoryCatalogProvider);
     final top = report.topCategories;
     final colors = context.pwColors;
     final textTheme = Theme.of(context).textTheme;
@@ -495,7 +497,7 @@ class _TopCategories extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  DefaultCategories.byId(c.categoryId).name,
+                  catalog.byId(c.categoryId).name,
                   style: textTheme.titleSmall?.copyWith(fontSize: 14),
                 ),
               ),

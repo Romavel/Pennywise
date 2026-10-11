@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/month.dart';
 import '../../auth/data/auth_providers.dart';
-import '../../transactions/data/transaction_providers.dart';
 import '../domain/budget.dart';
 import '../domain/budget_repository.dart';
 import 'firestore_budget_repository.dart';
+import '../../settings/data/profile_providers.dart';
 
 /// Budgets of the signed-in user; rebuilt when the user changes.
 final budgetRepositoryProvider = Provider<BudgetRepository>((ref) {

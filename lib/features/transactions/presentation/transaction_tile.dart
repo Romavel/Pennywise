@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/utils/dates.dart';
 import '../../../core/utils/money.dart';
-import '../../categories/domain/default_categories.dart';
 import '../../categories/presentation/category_icon.dart';
 import '../domain/transaction.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../categories/data/category_providers.dart';
 
 /// One row of a transaction list: category icon, note, category, amount.
-class TransactionTile extends StatelessWidget {
+class TransactionTile extends ConsumerWidget {
   const TransactionTile({
     required this.transaction,
     required this.onTap,
@@ -27,13 +28,12 @@ class TransactionTile extends StatelessWidget {
   final double horizontalPadding;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.pwColors;
     final textTheme = Theme.of(context).textTheme;
-    final category = DefaultCategories.byId(
-      transaction.categoryId,
-      type: transaction.type,
-    );
+    final category = ref
+        .watch(categoryCatalogProvider)
+        .byId(transaction.categoryId, type: transaction.type);
     final title = transaction.note.isNotEmpty
         ? transaction.note
         : category.name;

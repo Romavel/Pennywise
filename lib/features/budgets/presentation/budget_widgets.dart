@@ -7,6 +7,8 @@ import '../../../core/utils/money.dart';
 import '../../categories/presentation/category_icon.dart';
 import '../domain/budget_progress.dart';
 import 'budget_category.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../categories/data/category_providers.dart';
 
 extension BudgetStatusColors on BudgetStatus {
   Color color(PennywiseColors colors) => switch (this) {
@@ -59,7 +61,7 @@ class BudgetBar extends StatelessWidget {
 }
 
 /// A budget in the list: category, usage, percent, bar and status.
-class BudgetRow extends StatelessWidget {
+class BudgetRow extends ConsumerWidget {
   const BudgetRow({
     required this.progress,
     required this.currency,
@@ -72,10 +74,13 @@ class BudgetRow extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.pwColors;
     final textTheme = Theme.of(context).textTheme;
-    final category = categoryForBudget(progress.budget.categoryId);
+    final category = categoryForBudget(
+      ref.watch(categoryCatalogProvider),
+      progress.budget.categoryId,
+    );
     final status = progress.status;
     final statusColor = status.color(colors);
     final over = status == BudgetStatus.over;
@@ -153,7 +158,7 @@ class BudgetRow extends StatelessWidget {
 }
 
 /// Warning strip for budgets over their limit.
-class OverLimitBanner extends StatelessWidget {
+class OverLimitBanner extends ConsumerWidget {
   const OverLimitBanner({
     required this.overLimit,
     required this.currency,
@@ -164,10 +169,10 @@ class OverLimitBanner extends StatelessWidget {
   final String currency;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.pwColors;
     final text = overLimit.length == 1
-        ? '${categoryForBudget(overLimit.single.budget.categoryId).name} '
+        ? '${categoryForBudget(ref.watch(categoryCatalogProvider), overLimit.single.budget.categoryId).name} '
               'is over its limit by $currency '
               '${Money.format(overLimit.single.overMinor)}'
         : '${overLimit.length} budgets are over their limits';

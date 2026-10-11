@@ -6,10 +6,7 @@ import '../../auth/data/auth_providers.dart';
 import '../domain/transaction.dart';
 import '../domain/transaction_repository.dart';
 import 'firestore_transaction_repository.dart';
-
-/// The user's base currency. Fixed for now; the settings feature will read
-/// it from the user's profile.
-final currencyProvider = Provider<String>((ref) => 'PLN');
+import '../../settings/data/profile_providers.dart';
 
 /// Transactions of the signed-in user. Rebuilt when the user changes, so
 /// one account can never read another account's data from a stale instance.

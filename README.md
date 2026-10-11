@@ -2,7 +2,7 @@
 
 A Flutter app for tracking income, expenses and monthly budgets, backed by Firebase.
 
-> Status: **stage 5 — budgets and reports.** Authentication, transactions, a dashboard, monthly category budgets and reports work on Cloud Firestore. Settings, custom categories and account deletion come next.
+> Status: **stage 6 — settings and security.** Authentication, transactions, dashboard, budgets, reports, a synced profile (name, currency, theme), custom categories and server-side account deletion. Next: CI, integration tests and release polish.
 
 ## Stack
 
@@ -46,6 +46,10 @@ Views never talk to Firestore directly: presentation → Riverpod providers → 
    ```bash
    firebase deploy --only firestore:rules --project <your-project-id>
    ```
+   Account deletion runs in a Cloud Function, which needs the Blaze (pay-as-you-go) plan; it fits in the free tier for personal use:
+   ```bash
+   firebase deploy --only functions --project <your-project-id>
+   ```
 5. Run:
    ```bash
    flutter run
@@ -76,7 +80,18 @@ Emulator UI: http://localhost:4000. Firestore rules live in `firestore.rules` (d
 
 ## Data model
 
-Each user's data lives under `users/{uid}`. Transactions are stored in `users/{uid}/transactions/{id}`:
+Each user's data lives under `users/{uid}`. The document itself holds the profile:
+
+| Field | Type | Notes |
+|---|---|---|
+| `displayName` | string | 1–40 characters |
+| `currency` | string | base currency for new transactions and budgets; changing it doesn't convert past amounts |
+| `themeMode` | `"system"` \| `"light"` \| `"dark"` | |
+| `updatedAt` | timestamp | set by the server |
+
+Categories are stored in `users/{uid}/categories/{id}`. A built-in id (`food`, `salary`, …) holds only the user's name for it (`name`, `updatedAt`); a `custom_…` id holds a custom category (`name`, `type`, `icon`, `tone`, `createdAt`, `updatedAt`). Deleting a custom category also deletes its budgets; its transactions are kept and shown under "Other".
+
+ Transactions are stored in `users/{uid}/transactions/{id}`:
 
 | Field | Type | Notes |
 |---|---|---|
@@ -102,6 +117,10 @@ The overall budget (`categoryId: total`) limits all expenses of the month; when 
 
 The list queries one month by `occurredAt`; type, category and note search are applied on the device, so no composite indexes are needed. The dashboard's all-time balance listens to all of the user's transactions (served from Firestore's local cache after the first load); for very long histories this would move to a server-maintained running total.
 
+## Account deletion
+
+`functions/` contains the `deleteAccount` callable Cloud Function (TypeScript, region `europe-central2`). The app re-authenticates the user with their password, then calls it. The function rejects callers whose sign-in is older than five minutes, deletes `users/{uid}` with all subcollections (`recursiveDelete`) and only then the Firebase Auth user, so no data is ever left without an owner. Firestore rules don't let the app delete the profile itself.
+
 ## Quality checks
 
 ```bash
@@ -115,4 +134,13 @@ Firestore Security Rules are tested against the emulator (requires Node.js and J
 cd firestore-tests
 npm install
 npm run test:emulator
+```
+
+Cloud Functions have unit tests and an end-to-end test on the Auth, Firestore and Functions emulators:
+
+```bash
+cd functions
+npm install
+npm test
+npm run test:integration
 ```

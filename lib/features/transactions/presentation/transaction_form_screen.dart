@@ -12,13 +12,14 @@ import '../../../core/widgets/error_banner.dart';
 import '../../../core/widgets/segmented_switch.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../categories/domain/category.dart';
-import '../../categories/domain/default_categories.dart';
 import '../../categories/presentation/category_icon.dart';
 import '../data/transaction_providers.dart';
 import '../domain/transaction.dart';
 import '../domain/transaction_repository.dart';
 import '../domain/transaction_validators.dart';
 import 'transactions_controller.dart';
+import '../../settings/data/profile_providers.dart';
+import '../../categories/data/category_providers.dart';
 
 /// Add a transaction, or edit [transactionId] when given.
 class TransactionFormScreen extends ConsumerStatefulWidget {
@@ -125,7 +126,8 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
     setState(() {
       _type = type;
       final current = _categoryId;
-      if (current != null && DefaultCategories.byId(current).type != type) {
+      if (current != null &&
+          ref.read(categoryCatalogProvider).byId(current).type != type) {
         _categoryId = null;
       }
     });
@@ -272,7 +274,9 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
                     ),
                     const SizedBox(height: 16),
                     _CategoryGrid(
-                      categories: DefaultCategories.forType(_type),
+                      categories: ref
+                          .watch(categoryCatalogProvider)
+                          .forType(_type),
                       selectedId: _categoryId,
                       error: _showErrors ? _categoryError : null,
                       onSelected: busy
