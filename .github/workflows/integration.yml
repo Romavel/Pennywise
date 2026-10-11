@@ -60,5 +60,11 @@ jobs:
         if: failure()
         run: |
           [ -f integration.log ] || exit 0
-          msg=$(grep -E "STEP:|Timed out|Expected:|Actual:|Which:|TestFailure|Exception|Error:|══╡" integration.log | tail -30 | sed ':a;N;$!ba;s/\n/%0A/g')
+          {
+            grep "STEP:" integration.log | tail -3
+            # The first exception block: message and the top of the stack.
+            awk '/EXCEPTION CAUGHT/{f=1} f{print; if (++n >= 40) exit}' integration.log
+          } | tr -d '\r' > summary.txt
+          # Annotations encode %, CR and LF; one annotation holds the block.
+          msg=$(sed -e 's/%/%25/g' summary.txt | awk 'BEGIN{ORS="%0A"} {print}')
           echo "::error title=Integration test log::${msg}"
