@@ -3,11 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme/app_colors.dart';
-import '../../../app/theme/app_theme.dart';
 import '../../../core/errors/app_failure.dart';
 import '../../../core/widgets/error_banner.dart';
 import '../../../core/widgets/labeled_text_field.dart';
 import '../../../core/widgets/pennywise_logo.dart';
+import '../../../core/widgets/segmented_switch.dart';
 import '../domain/auth_validators.dart';
 import 'auth_controller.dart';
 import 'password_reset_sheet.dart';
@@ -112,8 +112,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        _ModeSwitch(
-                          mode: _mode,
+                        SegmentedSwitch(
+                          segments: const [
+                            (AuthMode.login, 'Log in'),
+                            (AuthMode.signup, 'Sign up'),
+                          ],
+                          selected: _mode,
                           onChanged: isLoading ? null : _setMode,
                         ),
                         if (state.hasError) ...[
@@ -247,74 +251,4 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   static String _messageFor(Object error) =>
       error is AppFailure ? error.message : const UnexpectedFailure().message;
-}
-
-/// "Log in | Sign up" switch from the design.
-class _ModeSwitch extends StatelessWidget {
-  const _ModeSwitch({required this.mode, required this.onChanged});
-
-  final AuthMode mode;
-  final ValueChanged<AuthMode>? onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.pwColors;
-    final textTheme = Theme.of(context).textTheme;
-
-    Widget segment(AuthMode value, String label) {
-      final selected = value == mode;
-      return Expanded(
-        child: Semantics(
-          button: true,
-          selected: selected,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: onChanged == null ? null : () => onChanged!(value),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              height: 42,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: selected ? colors.card : Colors.transparent,
-                borderRadius: BorderRadius.circular(11),
-                boxShadow: selected
-                    ? const [
-                        BoxShadow(
-                          color: Color(0x1F12201E),
-                          blurRadius: 3,
-                          offset: Offset(0, 1),
-                        ),
-                      ]
-                    : null,
-              ),
-              child: Text(
-                label,
-                style: textTheme.labelLarge?.copyWith(
-                  fontSize: 14,
-                  color: selected
-                      ? Theme.of(context).colorScheme.onSurface
-                      : colors.mutedText,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: colors.track,
-        borderRadius: BorderRadius.circular(AppRadii.input),
-      ),
-      child: Row(
-        children: [
-          segment(AuthMode.login, 'Log in'),
-          const SizedBox(width: 4),
-          segment(AuthMode.signup, 'Sign up'),
-        ],
-      ),
-    );
-  }
 }

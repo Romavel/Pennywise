@@ -2,7 +2,7 @@
 
 A Flutter app for tracking income, expenses and monthly budgets, backed by Firebase.
 
-> Status: **stage 2 — authentication.** Email/password sign up, log in, password reset, persistent sessions and protected routes work; the remaining feature screens are placeholders.
+> Status: **stage 3 — transactions.** Authentication plus adding, editing, deleting and filtering transactions stored in Cloud Firestore. Dashboard, budgets, reports and settings come next.
 
 ## Stack
 
@@ -41,8 +41,12 @@ Views never talk to Firestore directly: presentation → Riverpod providers → 
    ```bash
    flutterfire configure --platforms=android,ios
    ```
-3. In the Firebase console enable **Authentication → Sign-in method → Email/Password**.
-4. Run:
+3. In the Firebase console enable **Authentication → Sign-in method → Email/Password** and create a **Firestore Database** (production mode).
+4. Deploy the Firestore Security Rules:
+   ```bash
+   firebase deploy --only firestore:rules --project <your-project-id>
+   ```
+5. Run:
    ```bash
    flutter run
    ```
@@ -70,9 +74,33 @@ flutter run --dart-define=USE_FIREBASE_EMULATORS=true
 
 Emulator UI: http://localhost:4000. Firestore rules live in `firestore.rules` (deny-all baseline; owner-scoped rules are added per feature).
 
+## Data model
+
+Each user's data lives under `users/{uid}`. Transactions are stored in `users/{uid}/transactions/{id}`:
+
+| Field | Type | Notes |
+|---|---|---|
+| `type` | `"income"` \| `"expense"` | |
+| `amountMinor` | int | amount in the smallest currency unit (4599 = 45.99 PLN), always > 0 |
+| `currency` | string | ISO 4217 code, fixed after creation |
+| `categoryId` | string | stable id, e.g. `food`, `salary` |
+| `note` | string | up to 200 characters, may be empty |
+| `occurredAt` | timestamp | date of the transaction |
+| `createdAt`, `updatedAt` | timestamp | set by the server |
+
+The list queries one month by `occurredAt`; type, category and note search are applied on the device, so no composite indexes are needed.
+
 ## Quality checks
 
 ```bash
 flutter analyze
 flutter test
+```
+
+Firestore Security Rules are tested against the emulator (requires Node.js and Java):
+
+```bash
+cd firestore-tests
+npm install
+npm run test:emulator
 ```

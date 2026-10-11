@@ -1,11 +1,49 @@
 rules_version = '2';
 
-// Baseline: deny everything. Per-collection rules scoped to the owner's UID
-// (users/{uid}/...) are added together with each feature.
+// Every user's data lives under users/{uid} and only that user can access it.
+// Anything not matched below is denied.
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    match /users/{uid}/transactions/{transactionId} {
+      allow read: if isOwner(uid);
+
+      allow create: if isOwner(uid)
+        && isValidTransaction(request.resource.data)
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+
+      allow update: if isOwner(uid)
+        && isValidTransaction(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.currency == resource.data.currency
+        && request.resource.data.updatedAt == request.time;
+
+      allow delete: if isOwner(uid);
+    }
+
+    // Mirrors the client-side validation in the Flutter app.
+    function isValidTransaction(data) {
+      let fields = ['type', 'amountMinor', 'currency', 'categoryId', 'note',
+                    'occurredAt', 'createdAt', 'updatedAt'];
+      return data.keys().hasAll(fields)
+        && data.keys().hasOnly(fields)
+        && data.type in ['income', 'expense']
+        && data.amountMinor is int
+        && data.amountMinor > 0
+        && data.amountMinor <= 100000000000
+        && data.currency is string
+        && data.currency.matches('^[A-Z]{3}$')
+        && data.categoryId is string
+        && data.categoryId.size() > 0
+        && data.categoryId.size() <= 64
+        && data.note is string
+        && data.note.size() <= 200
+        && data.occurredAt is timestamp;
     }
   }
 }

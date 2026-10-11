@@ -33,10 +33,7 @@ void main() {
 
     await tester.tap(find.text('Transactions').last);
     await tester.pumpAndSettle();
-    expect(
-      find.text('The transaction list and filters arrive in stage 3.'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('No transactions in'), findsOneWidget);
     expect(find.byTooltip('Add transaction'), findsOneWidget);
   });
 
@@ -51,7 +48,7 @@ void main() {
     expect(find.text('New transaction'), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
 
-    await tester.tap(find.byType(CloseButton));
+    await tester.tap(find.byTooltip('Close'));
     await tester.pumpAndSettle();
     expect(find.byType(NavigationBar), findsOneWidget);
   });

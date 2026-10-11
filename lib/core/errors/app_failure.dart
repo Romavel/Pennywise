@@ -38,3 +38,22 @@ final class UnexpectedFailure extends AppFailure {
   @override
   String get message => 'Something went wrong. Please try again.';
 }
+
+enum DataFailureCode { permissionDenied, notFound, unavailable, unknown }
+
+/// A database read or write failed.
+final class DataFailure extends AppFailure {
+  const DataFailure(this.code);
+
+  final DataFailureCode code;
+
+  @override
+  String get message => switch (code) {
+    DataFailureCode.permissionDenied =>
+      'You don’t have access to this data. Try logging in again.',
+    DataFailureCode.notFound => 'This item no longer exists.',
+    DataFailureCode.unavailable =>
+      'Can’t reach the server. Check your connection and try again.',
+    DataFailureCode.unknown => 'Something went wrong. Please try again.',
+  };
+}

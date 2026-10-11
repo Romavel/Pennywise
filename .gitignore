@@ -52,3 +52,6 @@ ui-debug.log
 
 # Editor
 .vscode/
+
+# Firestore rules tests
+node_modules/
