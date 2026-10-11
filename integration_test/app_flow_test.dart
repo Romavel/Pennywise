@@ -145,6 +145,7 @@ void main() {
 
     // --- Log in again: the data is still there --------------------------------
     step('Log in again: the data is still there');
+    await tester.enterText(tester.field('auth-email'), email);
     await tester.enterText(tester.field('auth-password'), password);
     await tester.tapVisible(find.widgetWithText(FilledButton, 'Log in'));
     await tester.waitFor(find.text('Total balance'));
